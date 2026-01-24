@@ -1,0 +1,46 @@
+server:
+  port: 8910
+
+spring:
+  application:
+    name: wangyiyun-music
+
+  # 数据源配置
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wangyiyun-music?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: root123.
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      test-while-idle: true
+      validation-query: SELECT 1
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  # XML 文件位置
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类别名包路径
+  type-aliases-package: com.naruto.wangyiyunmusic.model.entity
+  configuration:
+    # 日志输出
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 驼峰转下划线
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      # 主键类型(自增)
+      id-type: auto
+      # 逻辑删除字段
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 日志配置
+logging:
+  level:
+    com.naruto.wangyiyunmusic.mapper: debug
