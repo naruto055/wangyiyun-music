@@ -56,7 +56,7 @@ springdoc:
     # 是否启用 Swagger UI
     enabled: true
     # Swagger UI 路径
-    path: /swagger-ui.html
+    path: /swagger-ui/index.html
     # 设置默认的展开方式
     default-models-expand-depth: 1
     default-model-expand-depth: 1
@@ -68,3 +68,8 @@ springdoc:
   packages-to-scan: com.naruto.wangyiyunmusic.controller
   # 是否显示其依赖的 Actuator 端点
   show-actuator: false
+  # 显示请求/响应示例
+  show-request-headers: true
+  # 禁用缓存（开发环境）
+  cache:
+    disabled: true
