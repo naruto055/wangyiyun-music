@@ -1,5 +1,6 @@
 package com.naruto.wangyiyunmusic.common;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
@@ -9,20 +10,24 @@ import lombok.Data;
  * @CreateTime: 2026-01-24
  */
 @Data
+@Schema(description = "统一响应结果")
 public class Result<T> {
     /**
      * 响应码
      */
+    @Schema(description = "响应码", example = "200")
     private Integer code;
 
     /**
      * 响应消息
      */
+    @Schema(description = "响应消息", example = "操作成功")
     private String message;
 
     /**
      * 响应数据
      */
+    @Schema(description = "响应数据")
     private T data;
 
     /**

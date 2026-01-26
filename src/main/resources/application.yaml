@@ -44,3 +44,27 @@ mybatis-plus:
 logging:
   level:
     com.naruto.wangyiyunmusic.mapper: debug
+
+# SpringDoc OpenAPI 配置
+springdoc:
+  api-docs:
+    # 是否启用 API 文档
+    enabled: true
+    # API 文档路径
+    path: /v3/api-docs
+  swagger-ui:
+    # 是否启用 Swagger UI
+    enabled: true
+    # Swagger UI 路径
+    path: /swagger-ui.html
+    # 设置默认的展开方式
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    # 按照标签排序
+    tags-sorter: alpha
+    # 按照路径排序
+    operations-sorter: alpha
+  # 扫描的包路径
+  packages-to-scan: com.naruto.wangyiyunmusic.controller
+  # 是否显示其依赖的 Actuator 端点
+  show-actuator: false
