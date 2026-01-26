@@ -5,6 +5,7 @@ import com.naruto.wangyiyunmusic.common.Result;
 import com.naruto.wangyiyunmusic.model.dto.MusicQueryDTO;
 import com.naruto.wangyiyunmusic.model.entity.Music;
 import com.naruto.wangyiyunmusic.model.vo.MusicDetailVO;
+import com.naruto.wangyiyunmusic.model.vo.MusicListVO;
 import com.naruto.wangyiyunmusic.service.MusicService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,11 +33,11 @@ public class MusicController {
      * 分页查询音乐列表
      *
      * @param queryDTO 查询条件
-     * @return 分页结果
+     * @return 分页结果（包含歌手名称）
      */
-    @Operation(summary = "分页查询音乐列表", description = "支持按分类、标签、关键词等条件筛选音乐")
+    @Operation(summary = "分页查询音乐列表", description = "支持按分类、标签、关键词等条件筛选音乐，返回包含歌手名称的音乐列表")
     @GetMapping("/list")
-    public IPage<Music> list(
+    public IPage<MusicListVO> list(
             @Parameter(description = "查询条件，包含关键词、分类ID、标签ID、页码、每页大小等")
             MusicQueryDTO queryDTO) {
         return musicService.pageQuery(queryDTO);

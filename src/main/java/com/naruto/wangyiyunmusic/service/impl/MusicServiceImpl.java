@@ -9,6 +9,7 @@ import com.naruto.wangyiyunmusic.model.entity.*;
 import com.naruto.wangyiyunmusic.mapper.MusicMapper;
 import com.naruto.wangyiyunmusic.model.vo.ArtistVO;
 import com.naruto.wangyiyunmusic.model.vo.MusicDetailVO;
+import com.naruto.wangyiyunmusic.model.vo.MusicListVO;
 import com.naruto.wangyiyunmusic.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,11 @@ import java.util.stream.Collectors;
  */
 @Service
 public class MusicServiceImpl extends ServiceImpl<MusicMapper, Music> implements MusicService {
+
+    /**
+     * 歌手名称分隔符
+     */
+    private static final String ARTIST_NAME_SEPARATOR = "/";
 
     @Autowired
     private ArtistService artistService;
@@ -52,11 +59,37 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper, Music> implements
     private MusicTagService musicTagService;
 
     @Override
-    public IPage<Music> pageQuery(MusicQueryDTO queryDTO) {
-        // 构建分页对象
+    public IPage<MusicListVO> pageQuery(MusicQueryDTO queryDTO) {
+        // 1. 构建分页对象
         Page<Music> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
 
-        // 构建查询条件
+        // 2. 构建查询条件
+        LambdaQueryWrapper<Music> wrapper = buildQueryWrapper(queryDTO);
+
+        // 3. 查询音乐分页数据
+        IPage<Music> musicPage = this.page(page, wrapper);
+
+        // 4. 转换为 MusicListVO
+        List<MusicListVO> voList = musicPage.getRecords().stream()
+                .map(this::convertToListVO)
+                .collect(Collectors.toList());
+
+        // 5. 批量填充歌手名称
+        fillArtistNames(voList);
+
+        // 6. 构造返回结果
+        Page<MusicListVO> result = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        result.setRecords(voList);
+        return result;
+    }
+
+    /**
+     * 构建查询条件
+     *
+     * @param queryDTO 查询条件
+     * @return 查询包装器
+     */
+    private LambdaQueryWrapper<Music> buildQueryWrapper(MusicQueryDTO queryDTO) {
         LambdaQueryWrapper<Music> wrapper = new LambdaQueryWrapper<>();
 
         // 分类筛选
@@ -76,7 +109,71 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper, Music> implements
             wrapper.orderBy(true, "asc".equals(queryDTO.getSortOrder()), Music::getCreateTime);
         }
 
-        return this.page(page, wrapper);
+        return wrapper;
+    }
+
+    /**
+     * Music 实体转换为 MusicListVO
+     *
+     * @param music 音乐实体
+     * @return MusicListVO
+     */
+    private MusicListVO convertToListVO(Music music) {
+        MusicListVO vo = new MusicListVO();
+        BeanUtils.copyProperties(music, vo);
+        // 日期格式化由 @JsonFormat 注解自动处理
+        return vo;
+    }
+
+    /**
+     * 批量填充歌手名称（避免 N+1 问题）
+     *
+     * @param voList 音乐列表VO
+     */
+    private void fillArtistNames(List<MusicListVO> voList) {
+        if (voList == null || voList.isEmpty()) {
+            return;
+        }
+
+        // 1. 收集所有音乐ID
+        List<Long> musicIds = voList.stream()
+                .map(MusicListVO::getId)
+                .collect(Collectors.toList());
+
+        // 2. 批量查询音乐-歌手关联关系
+        List<MusicArtist> musicArtists = musicArtistService.list(
+                new LambdaQueryWrapper<MusicArtist>().in(MusicArtist::getMusicId, musicIds)
+        );
+
+        if (musicArtists.isEmpty()) {
+            return;
+        }
+
+        // 3. 批量查询歌手信息
+        List<Long> artistIds = musicArtists.stream()
+                .map(MusicArtist::getArtistId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<Long, Artist> artistMap = artistService.listByIds(artistIds).stream()
+                .collect(Collectors.toMap(Artist::getId, Function.identity()));
+
+        // 4. 按音乐ID分组并拼接歌手名称
+        Map<Long, String> musicArtistNamesMap = musicArtists.stream()
+                .collect(Collectors.groupingBy(
+                        MusicArtist::getMusicId,
+                        Collectors.mapping(
+                                ma -> Optional.ofNullable(artistMap.get(ma.getArtistId()))
+                                        .map(Artist::getName)
+                                        .orElse(""),
+                                Collectors.joining(ARTIST_NAME_SEPARATOR)
+                        )
+                ));
+
+        // 5. 填充到VO
+        voList.forEach(vo -> vo.setArtistNames(
+                musicArtistNamesMap.getOrDefault(vo.getId(), "")
+        ));
     }
 
     @Override
