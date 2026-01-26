@@ -437,6 +437,75 @@ GET /api/play-record/history?pageNum=1&pageSize=10
 
 ---
 
+## 实现说明
+
+### 统一响应封装机制
+
+本项目采用 `@RestControllerAdvice` + `ResponseBodyAdvice` 实现统一响应封装，确保所有 API 接口返回格式一致。
+
+#### 工作原理
+
+**核心组件**：[GlobalResponseAdvice](src/main/java/com/naruto/wangyiyunmusic/config/GlobalResponseAdvice.java)
+
+```
+Controller 方法返回值 → GlobalResponseAdvice 自动包装 → HTTP 响应 Result<T>
+```
+
+**封装规则**：
+
+1. **自动封装**：所有 Controller 方法返回值自动包装为 `Result<T>`
+2. **类型判断**：
+   - 如果返回值已经是 `Result` 类型，直接返回
+   - 如果返回值为 `null`，返回空 `Result`
+   - 如果返回值是 `String` 类型，特殊处理后返回（避免类型转换问题）
+   - 其他类型统一封装为 `Result.success(body)`
+
+3. **排除机制**：支持通过 `[@IgnoreResponseWrap](src/main/java/com/naruto/wangyiyunmusic/annotation/IgnoreResponseWrap.java)` 注解排除特定接口
+   - 可标注在方法上：排除单个接口
+   - 可标注在类上：排除整个 Controller
+
+#### 代码示例
+
+**重构前**（手动包装）：
+```java
+@GetMapping("/list")
+public Result<IPage<Music>> list(MusicQueryDTO queryDTO) {
+    IPage<Music> page = musicService.pageQuery(queryDTO);
+    return Result.success(page);  // 手动包装
+}
+```
+
+**重构后**（自动包装）：
+```java
+@GetMapping("/list")
+public IPage<Music> list(MusicQueryDTO queryDTO) {
+    return musicService.pageQuery(queryDTO);  // 直接返回业务对象
+}
+```
+
+**排除自动封装的示例**：
+```java
+@IgnoreResponseWrap  // 排除此接口的自动封装
+@GetMapping("/export")
+public void exportData(HttpServletResponse response) {
+    // 文件下载等特殊场景
+}
+```
+
+#### 设计优势
+
+- ✅ **简化代码**：减少 Controller 中的重复 `Result.success()` 调用
+- ✅ **统一规范**：确保所有接口响应格式一致
+- ✅ **灵活可控**：支持排除机制，满足特殊场景需求
+- ✅ **零侵入性**：对前端调用者透明，无需修改调用代码
+
+#### 注意事项
+
+- 异常处理由 [GlobalExceptionHandler](src/main/java/com/naruto/wangyiyunmusic/exception/GlobalExceptionHandler.java) 统一处理，与响应封装职责分离
+- 文档中记录的 **HTTP 响应格式** 均为 `Result<T>`，不受实现细节影响
+
+---
+
 ## 附录
 
 ### A. 状态码说明
@@ -472,7 +541,9 @@ GET /api/play-record/history?pageNum=1&pageSize=10
 
 **文档更新日志**:
 
-- **2026-01-26**: 初始版本，包含 7 个基础接口文档
+- **2026-01-26**:
+  - 初始版本，包含 7 个基础接口文档
+  - 新增"实现说明"章节，说明统一响应封装机制
 
 ---
 
