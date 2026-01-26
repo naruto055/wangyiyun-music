@@ -83,7 +83,7 @@
 
 #### 1.1 分页查询音乐列表
 
-- **接口描述**: 支持按分类、标签、关键词等���件筛选音乐
+- **接口描述**: 支持按分类、标签、关键词等���件筛选音乐，返回包含歌手名称的音乐列表
 - **请求方法**: `GET`
 - **请求路径**: `/api/music/list`
 - **请求参数**:
@@ -97,7 +97,7 @@
 | sortField | String | 否 | create_time | 排序字段 | "play_count" |
 | sortOrder | String | 否 | desc | 排序方式（asc/desc） | "desc" |
 
-- **响应数据**: `Result<IPage<Music>>`
+- **响应数据**: `Result<IPage<MusicListVO>>`
   - `data.records`: 音乐列表
   - `data.total`: 总记录数
   - `data.pages`: 总页数
@@ -120,12 +120,14 @@ GET /api/music/list?pageNum=1&pageSize=10&keyword=周杰伦&sortField=play_count
     "records": [
       {
         "id": 1,
-        "name": "七里香",
-        "url": "https://music.example.com/1.mp3",
+        "title": "七里香",
+        "fileUrl": "https://music.example.com/1.mp3",
         "coverUrl": "https://cover.example.com/1.jpg",
         "duration": 299,
         "playCount": 1000000,
+        "artistNames": "周杰伦",
         "categoryId": 1,
+        "updateTime": "2026-01-01 10:00:00",
         "createTime": "2026-01-01 10:00:00"
       }
     ],
@@ -136,6 +138,10 @@ GET /api/music/list?pageNum=1&pageSize=10&keyword=周杰伦&sortField=play_count
   }
 }
 ```
+
+> **说明**：
+> - `artistNames`: 歌手名称，多个歌手用 "/" 分隔，例如："周杰伦/方文山"
+> - 日期时间格式统一为：`yyyy-MM-dd HH:mm:ss`
 
 ---
 
@@ -534,7 +540,6 @@ public void exportData(HttpServletResponse response) {
 ### C. 相关链接
 
 - [Swagger UI 在线文档](http://localhost:8910/swagger-ui/index.html)
-- [OpenAPI JSON 规范](http://localhost:8910/v3/api-docs)
 - [项目 GitHub 仓库](#) (待添加)
 
 ---
@@ -544,6 +549,7 @@ public void exportData(HttpServletResponse response) {
 - **2026-01-26**:
   - 初始版本，包含 7 个基础接口文档
   - 新增"实现说明"章节，说明统一响应封装机制
+  - 更新音乐列表接口，返回 MusicListVO，添加 artistNames 字段
 
 ---
 
