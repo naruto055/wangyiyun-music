@@ -172,25 +172,24 @@ GET /api/music/1
   "message": "操作成功",
   "data": {
     "id": 1,
-    "name": "七里香",
-    "url": "https://music.example.com/1.mp3",
+    "title": "七里香",
+    "fileUrl": "https://music.example.com/1.mp3",
     "coverUrl": "https://cover.example.com/1.jpg",
     "duration": 299,
     "playCount": 1000000,
-    "categoryId": 1,
+    "favoriteCount": 5000,
+    "releaseDate": "2024-09-28",
+    "albumName": "七里香专辑",
+    "categoryName": "流行",
     "artists": [
       {
         "id": 1,
         "name": "周杰伦",
+        "role": "singer",
         "avatarUrl": "https://artist.example.com/jay.jpg"
       }
     ],
-    "tags": [
-      {
-        "id": 1,
-        "name": "流行"
-      }
-    ]
+    "tags": ["流行", "华语", "经典"]
   }
 }
 ```
@@ -418,8 +417,21 @@ GET /api/play-record/history?pageNum=1&pageSize=10
 
 | 字段 | 类型 | 描述 | 示例 |
 |------|------|------|------|
-| artists | List&lt;Artist&gt; | 歌手列表 | [...] |
-| tags | List&lt;Tag&gt; | 标签列表 | [...] |
+| favoriteCount | Integer | 收藏次数 | 5000 |
+| releaseDate | LocalDate | 发行日期 | "2024-09-28" |
+| albumName | String | 专辑名称 | "七里香专辑" |
+| categoryName | String | 分类名称 | "流行" |
+| artists | List&lt;ArtistVO&gt; | 歌手列表（包含 id, name, role, avatarUrl） | [...] |
+| tags | List&lt;String&gt; | 标签名称列表 | ["流行", "华语", "经典"] |
+
+### ArtistVO (歌手信息)
+
+| 字段 | 类型 | 描述 | 示例 |
+|------|------|------|------|
+| id | Long | 歌手ID | 1 |
+| name | String | 歌手名称 | "周杰伦" |
+| role | String | 角色（singer/composer/lyricist） | "singer" |
+| avatarUrl | String | 头像URL | "https://artist.example.com/jay.jpg" |
 
 ### Favorite (收藏)
 
@@ -550,6 +562,8 @@ public void exportData(HttpServletResponse response) {
   - 初始版本，包含 7 个基础接口文档
   - 新增"实现说明"章节，说明统一响应封装机制
   - 更新音乐列表接口，返回 MusicListVO，添加 artistNames 字段
+  - 修正音乐详情接口文档：tags 改为 List<String> 类型
+  - 补充 ArtistVO 数据模型说明
 
 ---
 
