@@ -34,11 +34,10 @@ public class FavoriteController {
      */
     @Operation(summary = "收藏音乐", description = "将指定音乐添加到用户的收藏列表")
     @PostMapping("/{musicId}")
-    public Result<Void> addFavorite(
+    public void addFavorite(
             @Parameter(description = "音乐ID", example = "1", required = true)
             @PathVariable Long musicId) {
         favoriteService.addFavorite(musicId);
-        return Result.success();
     }
 
     /**
@@ -49,11 +48,10 @@ public class FavoriteController {
      */
     @Operation(summary = "取消收藏", description = "从用户的收藏列表中移除指定音乐")
     @DeleteMapping("/{musicId}")
-    public Result<Void> removeFavorite(
+    public void removeFavorite(
             @Parameter(description = "音乐ID", example = "1", required = true)
             @PathVariable Long musicId) {
         favoriteService.removeFavorite(musicId);
-        return Result.success();
     }
 
     /**
@@ -65,13 +63,12 @@ public class FavoriteController {
      */
     @Operation(summary = "查询收藏列表", description = "分页查询用户的音乐收藏列表")
     @GetMapping("/list")
-    public Result<IPage<Favorite>> getFavoriteList(
+    public IPage<Favorite> getFavoriteList(
             @Parameter(description = "页码", example = "1")
             @RequestParam(defaultValue = "1") Integer pageNum,
             @Parameter(description = "每页大小", example = "10")
             @RequestParam(defaultValue = "10") Integer pageSize
     ) {
-        IPage<Favorite> page = favoriteService.getFavoriteList(0L, pageNum, pageSize);
-        return Result.success(page);
+        return favoriteService.getFavoriteList(0L, pageNum, pageSize);
     }
 }

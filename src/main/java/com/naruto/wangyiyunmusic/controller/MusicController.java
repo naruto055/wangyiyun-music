@@ -36,11 +36,10 @@ public class MusicController {
      */
     @Operation(summary = "分页查询音乐列表", description = "支持按分类、标签、关键词等条件筛选音乐")
     @GetMapping("/list")
-    public Result<IPage<Music>> list(
+    public IPage<Music> list(
             @Parameter(description = "查询条件，包含关键词、分类ID、标签ID、页码、每页大小等")
             MusicQueryDTO queryDTO) {
-        IPage<Music> page = musicService.pageQuery(queryDTO);
-        return Result.success(page);
+        return musicService.pageQuery(queryDTO);
     }
 
     /**
@@ -51,10 +50,9 @@ public class MusicController {
      */
     @Operation(summary = "获取音乐详情", description = "根据音乐ID查询详细信息，包含歌手、专辑、标签等关联数据")
     @GetMapping("/{id}")
-    public Result<MusicDetailVO> getDetail(
+    public MusicDetailVO getDetail(
             @Parameter(description = "音乐ID", example = "1", required = true)
             @PathVariable Long id) {
-        MusicDetailVO detail = musicService.getMusicDetail(id);
-        return Result.success(detail);
+        return musicService.getMusicDetail(id);
     }
 }

@@ -36,11 +36,10 @@ public class PlayRecordController {
      */
     @Operation(summary = "记录播放", description = "记录用户播放音乐的详细信息，包括播放进度、播放时长等")
     @PostMapping
-    public Result<Void> recordPlay(
+    public void recordPlay(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "播放记录信息")
             @org.springframework.web.bind.annotation.RequestBody @Valid PlayRecordDTO recordDTO) {
         playRecordService.recordPlay(recordDTO);
-        return Result.success();
     }
 
     /**
@@ -52,13 +51,12 @@ public class PlayRecordController {
      */
     @Operation(summary = "查询播放历史", description = "分页查询用户的播放历史记录")
     @GetMapping("/history")
-    public Result<IPage<PlayRecord>> getHistory(
+    public IPage<PlayRecord> getHistory(
             @Parameter(description = "页码", example = "1")
             @RequestParam(defaultValue = "1") Integer pageNum,
             @Parameter(description = "每页大小", example = "10")
             @RequestParam(defaultValue = "10") Integer pageSize
     ) {
-        IPage<PlayRecord> page = playRecordService.getPlayHistory(0L, pageNum, pageSize);
-        return Result.success(page);
+        return playRecordService.getPlayHistory(0L, pageNum, pageSize);
     }
 }
