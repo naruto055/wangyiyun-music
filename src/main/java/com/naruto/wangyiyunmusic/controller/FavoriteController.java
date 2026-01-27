@@ -3,6 +3,7 @@ package com.naruto.wangyiyunmusic.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.naruto.wangyiyunmusic.common.Result;
 import com.naruto.wangyiyunmusic.model.entity.Favorite;
+import com.naruto.wangyiyunmusic.model.vo.FavoriteVO;
 import com.naruto.wangyiyunmusic.service.FavoriteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -59,11 +60,11 @@ public class FavoriteController {
      *
      * @param pageNum  页码
      * @param pageSize 每页大小
-     * @return 收藏列表
+     * @return 收藏列表（包含音乐详细信息）
      */
-    @Operation(summary = "查询收藏列表", description = "分页查询用户的音乐收藏列表")
+    @Operation(summary = "查询收藏列表", description = "分页查询用户的音乐收藏列表，返回包含歌手、封面、专辑等音乐详情")
     @GetMapping("/list")
-    public IPage<Favorite> getFavoriteList(
+    public IPage<FavoriteVO> getFavoriteList(
             @Parameter(description = "页码", example = "1")
             @RequestParam(defaultValue = "1") Integer pageNum,
             @Parameter(description = "每页大小", example = "10")

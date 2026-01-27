@@ -2,6 +2,7 @@ package com.naruto.wangyiyunmusic.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.naruto.wangyiyunmusic.model.entity.Favorite;
+import com.naruto.wangyiyunmusic.model.vo.FavoriteVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -34,7 +35,7 @@ public interface FavoriteService extends IService<Favorite> {
      * @param userId   用户ID
      * @param pageNum  页码
      * @param pageSize 每页大小
-     * @return 收藏列表
+     * @return 收藏列表（包含音乐详细信息）
      */
-    IPage<Favorite> getFavoriteList(Long userId, Integer pageNum, Integer pageSize);
+    IPage<FavoriteVO> getFavoriteList(Long userId, Integer pageNum, Integer pageSize);
 }

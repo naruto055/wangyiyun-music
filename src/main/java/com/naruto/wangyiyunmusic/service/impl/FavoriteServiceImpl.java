@@ -7,12 +7,20 @@ import com.naruto.wangyiyunmusic.exception.BusinessException;
 import com.naruto.wangyiyunmusic.model.entity.Favorite;
 import com.naruto.wangyiyunmusic.mapper.FavoriteMapper;
 import com.naruto.wangyiyunmusic.model.entity.Music;
+import com.naruto.wangyiyunmusic.model.vo.FavoriteVO;
 import com.naruto.wangyiyunmusic.service.FavoriteService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.naruto.wangyiyunmusic.service.MusicService;
+import com.naruto.wangyiyunmusic.service.ArtistNameService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -27,6 +35,9 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
 
     @Autowired
     private MusicService musicService;
+
+    @Autowired
+    private ArtistNameService artistNameService;
 
     @Override
     @Transactional
@@ -72,6 +83,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
     public void removeFavorite(Long musicId) {
         Long userId = 0L; // 暂时默认0
 
+        // 检查收藏是否存在
         Favorite favorite = this.getOne(
                 new LambdaQueryWrapper<Favorite>()
                         .eq(Favorite::getUserId, userId)
@@ -82,9 +94,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
             throw new BusinessException("未收藏该音乐");
         }
 
-        // 逻辑删除
-        favorite.setIsDeleted(1);
-        this.updateById(favorite);
+        this.removeById(favorite.getId());
 
         // 更新音乐收藏次数
         Music music = musicService.getById(musicId);
@@ -95,12 +105,59 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
     }
 
     @Override
-    public IPage<Favorite> getFavoriteList(Long userId, Integer pageNum, Integer pageSize) {
+    public IPage<FavoriteVO> getFavoriteList(Long userId, Integer pageNum, Integer pageSize) {
+        // 1. 查询收藏分页数据
         Page<Favorite> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Favorite> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Favorite::getUserId, userId)
                 .eq(Favorite::getIsDeleted, 0)
                 .orderByDesc(Favorite::getCreateTime);
-        return this.page(page, wrapper);
+        IPage<Favorite> favoritePage = this.page(page, wrapper);
+
+        // 2. 如果没有收藏记录，直接返回空结果
+        if (favoritePage.getRecords().isEmpty()) {
+            Page<FavoriteVO> emptyResult = new Page<>(pageNum, pageSize, 0);
+            emptyResult.setRecords(List.of());
+            return emptyResult;
+        }
+
+        // 3. 提取所有音乐ID
+        List<Long> musicIds = favoritePage.getRecords().stream()
+                .map(Favorite::getMusicId)
+                .collect(Collectors.toList());
+
+        // 4. 批量查询音乐信息
+        List<Music> musicList = musicService.listByIds(musicIds);
+        Map<Long, Music> musicMap = musicList.stream()
+                .collect(Collectors.toMap(Music::getId, Function.identity()));
+
+        // 5. 转换为 FavoriteVO 列表
+        List<FavoriteVO> favoriteVOList = favoritePage.getRecords().stream()
+                .map(favorite -> {
+                    Music music = musicMap.get(favorite.getMusicId());
+                    if (music == null) {
+                        return null;
+                    }
+
+                    // 5.1 复制音乐基本信息到 FavoriteVO
+                    FavoriteVO vo = new FavoriteVO();
+                    BeanUtils.copyProperties(music, vo);
+
+                    // 5.2 设置收藏特有信息
+                    vo.setFavoriteId(favorite.getId());
+                    vo.setFavoriteTime(favorite.getCreateTime());
+
+                    return vo;
+                })
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // 6. 批量填充歌手名称（使用公共服务避免 N+1 问题）
+        artistNameService.fillArtistNames(favoriteVOList);
+
+        // 7. 构造返回结果
+        Page<FavoriteVO> result = new Page<>(favoritePage.getCurrent(), favoritePage.getSize(), favoritePage.getTotal());
+        result.setRecords(favoriteVOList);
+        return result;
     }
 }

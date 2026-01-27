@@ -1,6 +1,7 @@
 package com.naruto.wangyiyunmusic.model.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.naruto.wangyiyunmusic.service.ArtistNameFillable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Schema(description = "音乐列表信息")
-public class MusicListVO {
+public class MusicListVO implements ArtistNameFillable {
 
     /**
      * 音乐ID
