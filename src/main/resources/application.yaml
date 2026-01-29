@@ -43,7 +43,10 @@ mybatis-plus:
 # 日志配置
 logging:
   level:
+    # Mapper 层 SQL 日志（开发环境建议 debug，生产环境建议 info）
     com.naruto.wangyiyunmusic.mapper: debug
+    # 音频服务日志（记录音频URL生成和访问情况）
+    com.naruto.wangyiyunmusic.service.impl.AudioServiceImpl: info
 
 # SpringDoc OpenAPI 配置
 springdoc:
@@ -73,3 +76,21 @@ springdoc:
   # 禁用缓存（开发环境）
   cache:
     disabled: true
+
+# 音频文件配置
+audio:
+  # 音频文件存储的物理路径（根据实际部署环境调整）
+  # Windows 示例: file:D:/music-data/audio/
+  # Linux 示例: file:/data/music/audio/
+  storage-path: file:D:/music-data/audio/
+
+  # 访问URL前缀（静态资源路径）
+  url-prefix: /audio/
+
+  # 服务器基础URL配置（用于构建完整的音频访问URL）
+  # 开发环境: http://localhost:8910
+  # 生产环境: https://music.example.com 或 http://192.168.1.100:8910
+  # Docker环境: http://容器IP:端口
+  # 说明：前端通过此URL访问音频文件，需根据实际部署环境配置
+  # 支持占位符：${server.port} 会自动替换为server.port的值
+  server-base-url: http://localhost:${server.port}
