@@ -28,6 +28,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private String audioStoragePath;
 
     /**
+     * 临时文件存储路径
+     */
+    @Value("${video.parser.temp-path}")
+    private String tempFilePath;
+
+    /**
+     * 临时音频访问URL前缀
+     */
+    @Value("${video.parser.temp-audio-url-prefix}")
+    private String tempAudioUrlPrefix;
+
+    /**
      * 配置静态资源处理
      *
      * @param registry 资源处理器注册表
@@ -45,6 +57,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/audio/**")
                 .addResourceLocations(audioStoragePath)
                 .setCachePeriod(3600)  // 浏览器缓存1小时，提升性能
+                .resourceChain(true);   // 启用资源链，支持Range请求
+
+        // 临时音频文件静态资源映射（视频解析提取的临时文件）
+        // 使用配置的URL前缀（末尾需要 /**）
+        registry.addResourceHandler(tempAudioUrlPrefix + "**")
+                .addResourceLocations("file:" + tempFilePath)
+                .setCachePeriod(600)    // 浏览器缓存10分钟（临时文件）
                 .resourceChain(true);   // 启用资源链，支持Range请求
     }
 }

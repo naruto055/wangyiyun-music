@@ -94,3 +94,63 @@ audio:
   # 说明：前端通过此URL访问音频文件，需根据实际部署环境配置
   # 支持占位符：${server.port} 会自动替换为server.port的值
   server-base-url: http://localhost:${server.port}
+
+# 视频解析配置
+video:
+  parser:
+    # yt-dlp可执行文件路径（如果为空，会自动检测操作系统）
+    # Windows: ${user.dir}/tools/yt-dlp.exe
+    # Linux: /usr/local/bin/yt-dlp
+    yt-dlp-path: ${video.parser.yt-dlp-executable:}
+
+    # 音频提取配置
+    audio-format: mp3              # 音频格式（预留multi-format扩展）
+    audio-quality: 0               # 音频质量（0=最佳，9=最差）
+    max-file-size: 30M             # 单文件大小限制
+
+    # 临时文件配置
+    temp-path: D:/music-data/temp/          # 临时文件存储路径
+    temp-file-retention-hours: 1            # 临时文件保留时间（小时）
+    enable-auto-cleanup: true               # 是否启用自动清理
+    cleanup-cron: "0 */30 * * * ?"          # 清理任务执行间隔（每30分钟）
+
+    # 存储配置
+    total-capacity: 2GB            # 总存储容量限制
+
+    # 下载超时配置（秒）
+    timeout: 300                   # 5分钟超时
+
+    # 服务器基础URL
+    server-base-url: http://localhost:${server.port}
+
+    # 临时音频访问URL前缀（静态资源路径）
+    temp-audio-url-prefix: /temp-audio/
+
+    # 支持的平台列表
+    supported-platforms:
+      - BILIBILI
+      - YOUTUBE                    # 预留
+
+---
+# 开发环境（Windows）
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+video:
+  parser:
+    yt-dlp-executable: ${user.dir}/tools/yt-dlp.exe
+    temp-path: D:/music-data/temp/
+
+---
+# 生产环境（Linux）
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+video:
+  parser:
+    yt-dlp-executable: /usr/local/bin/yt-dlp
+    temp-path: /data/music-data/temp/

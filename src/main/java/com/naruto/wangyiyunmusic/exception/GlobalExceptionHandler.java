@@ -29,6 +29,33 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 视频解析异常
+     */
+    @ExceptionHandler(VideoParseException.class)
+    public Result<Void> handleVideoParseException(VideoParseException e) {
+        log.error("视频解析异常: {}", e.getMessage(), e);
+        return Result.error("视频解析失败: " + e.getMessage());
+    }
+
+    /**
+     * 文件验证异常
+     */
+    @ExceptionHandler(FileValidationException.class)
+    public Result<Void> handleFileValidationException(FileValidationException e) {
+        log.error("文件验证异常: {}", e.getMessage());
+        return Result.error("文件验证失败: " + e.getMessage());
+    }
+
+    /**
+     * 存储容量异常
+     */
+    @ExceptionHandler(StorageCapacityException.class)
+    public Result<Void> handleStorageCapacityException(StorageCapacityException e) {
+        log.error("存储容量异常: {}", e.getMessage());
+        return Result.error("存储空间不足: " + e.getMessage());
+    }
+
+    /**
      * 业务异常
      */
     @ExceptionHandler(BusinessException.class)

@@ -1,6 +1,7 @@
 # API 测试指南
 
 **创建时间**: 2026-01-24
+**最后更新**: 2026-01-30
 **项目**: 网易云音乐后端系统
 
 ---
@@ -334,6 +335,66 @@ curl -X DELETE "http://localhost:8910/api/favorite/1"
 
 ---
 
+### 8. 获取音频访问URL
+
+**接口**: `GET /api/audio/{musicId}`
+**功能**: 根据音乐ID获取音频文件访问URL，支持HTTP Range请求
+
+**路径参数**:
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| musicId | Long | 音乐ID |
+
+**测试用例**:
+
+```bash
+# 用例 1: 获取ID=1的音频URL
+curl -X GET "http://localhost:8910/api/audio/1"
+```
+
+**预期响应**:
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": {
+    "audioUrl": "http://localhost:8910/audio/jay/晴天.mp3",
+    "musicId": 1,
+    "title": "晴天",
+    "fileName": "晴天.mp3",
+    "duration": 269
+  }
+}
+```
+
+**错误测试**:
+```bash
+# 用例 2: 测试不存在的音乐ID
+curl -X GET "http://localhost:8910/api/audio/999"
+```
+
+**预期响应**（错误）:
+```json
+{
+  "code": 500,
+  "message": "音乐不存在，ID: 999",
+  "data": null
+}
+```
+
+**前端集成测试**:
+```html
+<!-- 在浏览器中测试音频播放 -->
+<audio src="http://localhost:8910/audio/jay/晴天.mp3" controls></audio>
+```
+
+> **说明**：
+> - `audioUrl` 可直接用于 HTML5 `<audio>` 标签
+> - 支持拖拽播放（HTTP Range请求）
+> - 浏览器可以缓存音频文件
+
+---
+
 ## 🧪 完整测试流程
 
 ### 流程 1: 音乐播放流程
@@ -376,6 +437,31 @@ curl -X DELETE "http://localhost:8910/api/favorite/1"
 curl -X GET "http://localhost:8910/api/music/1"
 ```
 
+### 流程 3: 音频播放流程
+
+```bash
+# 1. 查询音乐列表，选择要播放的音乐
+curl -X GET "http://localhost:8910/api/music/list"
+
+# 2. 获取音频URL
+curl -X GET "http://localhost:8910/api/audio/1"
+
+# 3. 使用audioUrl在前端播放器中播放（支持拖拽）
+# 前端代码示例：
+# <audio src="http://localhost:8910/audio/jay/晴天.mp3" controls></audio>
+
+# 4. 播放完成后，记录播放历史
+curl -X POST "http://localhost:8910/api/play-record" \
+  -H "Content-Type: application/json" \
+  -d '{"musicId": 1, "playDuration": 269, "playSource": "web"}'
+
+# 5. 验证播放次数增加
+curl -X GET "http://localhost:8910/api/music/1"
+
+# 6. 查询播放历史，确认记录已保存
+curl -X GET "http://localhost:8910/api/play-record/history"
+```
+
 ---
 
 ## ✅ 验证清单
@@ -393,6 +479,10 @@ curl -X GET "http://localhost:8910/api/music/1"
 - [ ] 取消收藏功能（收藏次数自动-1）
 - [ ] 重复收藏校验（提示"已收藏该音乐"）
 - [ ] 异常处理（音乐不存在、参数校验等）
+- [ ] 音频URL获取（正常返回audioUrl）
+- [ ] 音频URL访问（支持HTTP Range请求）
+- [ ] 音频文件播放（前端可正常播放）
+- [ ] 音频不存在错误处理（返回错误信息）
 
 ---
 

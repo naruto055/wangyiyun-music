@@ -2,8 +2,8 @@
 
 > 基于 Spring Boot 的网易云音乐后端服务系统 API 文档
 >
-> **文档版本**: v1.0.0
-> **生成时间**: 2026-01-26 00:04:51
+> **文档版本**: v1.1.0
+> **生成时间**: 2026-01-30 21:49:46
 > **基础路径**: http://localhost:8910
 
 ---
@@ -16,6 +16,7 @@
   - [音乐管理](#1-音乐管理)
   - [收藏管理](#2-收藏管理)
   - [播放记录管理](#3-播放记录管理)
+  - [音频管理](#4-音频管理)
 - [数据模型](#数据模型)
 
 ---
@@ -264,7 +265,7 @@ DELETE /api/favorite/1
 
 #### 2.3 查询收藏列表
 
-- **接口描述**: 分页查询用户的音乐收藏列表
+- **接口描述**: 分页查询用户的音乐收藏列表，返回包含歌手、封面、专辑等音乐详情
 - **请求方法**: `GET`
 - **请求路径**: `/api/favorite/list`
 - **请求参数**:
@@ -274,7 +275,7 @@ DELETE /api/favorite/1
 | pageNum | Integer | 否 | 1 | 页码 | 1 |
 | pageSize | Integer | 否 | 10 | 每页大小 | 10 |
 
-- **响应数据**: `Result<IPage<Favorite>>`
+- **响应数据**: `Result<IPage<FavoriteVO>>`
 
 **请求示例**:
 
@@ -396,6 +397,72 @@ GET /api/play-record/history?pageNum=1&pageSize=10
 
 ---
 
+### 4. 音频管理
+
+**模块路径**: `/api/audio`
+
+#### 4.1 获取音频访问URL
+
+- **接口描述**: 根据音乐ID获取音频文件的访问URL，前端可直接使用该URL播放音频，支持HTTP Range请求实现拖拽播放
+- **请求方法**: `GET`
+- **请求路径**: `/api/audio/{musicId}`
+- **请求参数**:
+
+| 参数名 | 类型 | 必填 | 描述 | 示例 |
+|--------|------|------|------|------|
+| musicId | Long | 是 | 音乐ID | 1 |
+
+- **响应数据**: `Result<AudioUrlVO>`
+
+**请求示例**:
+
+```bash
+GET /api/audio/1
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": {
+    "audioUrl": "http://localhost:8910/audio/jay/晴天.mp3",
+    "musicId": 1,
+    "title": "晴天",
+    "fileName": "晴天.mp3",
+    "duration": 269
+  }
+}
+```
+
+**错误场景**:
+
+1. **音乐不存在**:
+```json
+{
+  "code": 500,
+  "message": "音乐不存在，ID: 999",
+  "data": null
+}
+```
+
+2. **音频文件不存在**:
+```json
+{
+  "code": 500,
+  "message": "该音乐暂无音频文件",
+  "data": null
+}
+```
+
+> **说明**：
+> - `audioUrl`: 音频文件访问URL，可直接用于 `<audio>` 标签的 src 属性
+> - `supportRange`: 服务器支持HTTP Range请求，可实现拖拽播放功能
+> - 前端使用示例：`<audio src="http://localhost:8910/audio/jay/晴天.mp3" controls></audio>`
+
+---
+
 ## 数据模型
 
 ### Music (音乐实体)
@@ -452,6 +519,25 @@ GET /api/play-record/history?pageNum=1&pageSize=10
 | playDuration | Integer | 播放时长（秒） | 180 |
 | playSource | String | 播放来源 | "web" |
 | createTime | DateTime | 创建时间 | "2026-01-01 10:00:00" |
+
+### AudioUrlVO (音频URL视图对象)
+
+| 字段 | 类型 | 描述 | 示例 |
+|------|------|------|------|
+| audioUrl | String | 音频文件访问URL | "http://localhost:8910/audio/jay/晴天.mp3" |
+| musicId | Long | 音乐ID | 1 |
+| title | String | 音乐标题 | "晴天" |
+| fileName | String | 音频文件名 | "晴天.mp3" |
+| duration | Integer | 音乐时长（秒） | 269 |
+
+### FavoriteVO (收藏视图对象)
+
+继承自 MusicListVO，包含所有音乐列表字段，额外增加：
+
+| 字段 | 类型 | 描述 | 示例 |
+|------|------|------|------|
+| favoriteId | Long | 收藏ID | 1 |
+| favoriteTime | DateTime | 收藏时间 | "2026-01-27 10:00:00" |
 
 ---
 
@@ -557,6 +643,15 @@ public void exportData(HttpServletResponse response) {
 ---
 
 **文档更新日志**:
+
+- **2026-01-30**:
+  - 版本升级至 v1.1.0
+  - 新增音频管理模块文档（AudioController）
+  - 新增 4.1 获取音频访问URL 接口文档
+  - 新增 AudioUrlVO 数据模型说明
+  - 新增 FavoriteVO 数据模型说明
+  - 修正收藏列表接口响应类型：Favorite -> FavoriteVO
+  - 验证现有接口文档准确性
 
 - **2026-01-26**:
   - 初始版本，包含 7 个基础接口文档
