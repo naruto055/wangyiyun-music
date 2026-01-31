@@ -286,6 +286,21 @@ function health_check() {
     else
         log_warn "⚠️ 数据目录可能未正确创建"
     fi
+
+    # 检查 API 服务（可选）
+    if command -v curl &> /dev/null; then
+        log_info "检查 API 服务..."
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${SERVER_PORT}/swagger-ui/index.html || echo "000")
+        if [[ ${HTTP_CODE} == "200" ]]; then
+            log_info "✅ Swagger UI 访问正常"
+        else
+            log_warn "⚠️ Swagger UI 访问异常，HTTP Code: ${HTTP_CODE}"
+            log_warn "   可能原因：应用仍在启动中，请稍后手动验证"
+        fi
+    else
+        log_warn "⚠️ 未安装 curl，跳过 API 检查"
+        log_info "   请手动访问：http://localhost:${SERVER_PORT}/swagger-ui/index.html"
+    fi
 }
 
 # ==================== 显示部署信息 ====================
