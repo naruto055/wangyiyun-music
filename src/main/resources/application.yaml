@@ -79,10 +79,19 @@ springdoc:
 
 # 音频文件配置
 audio:
-  # 音频文件存储的物理路径（根据实际部署环境调整）
-  # Windows 示例: file:D:/music-data/audio/
-  # Linux 示例: file:/data/music/audio/
-  storage-path: file:D:/music-data/audio/
+  # 音频文件存储的物理路径（支持环境变量覆盖）
+  # 推荐部署方式：在应用目录下创建 music-data/audio/ 子目录
+  # 默认值：file:${user.dir}/music-data/audio/（相对于应用部署目录）
+  # 环境变量：MUSIC_AUDIO_PATH（可选，用于自定义路径）
+  #
+  # 部署示例：
+  # /opt/service/wangyiyun-music/
+  # ├── wangyiyun-music.jar
+  # ├── music-data/
+  # │   └── audio/              ← 音频文件存储在此
+  #
+  # 自定义路径示例：export MUSIC_AUDIO_PATH=file:/data/music-data/audio/
+  storage-path: ${MUSIC_AUDIO_PATH:file:${user.dir}/music-data/audio/}
 
   # 访问URL前缀（静态资源路径）
   url-prefix: /audio/
@@ -109,7 +118,19 @@ video:
     max-file-size: 30M             # 单文件大小限制
 
     # 临时文件配置
-    temp-path: D:/music-data/temp/          # 临时文件存储路径
+    # 临时文件存储路径（支持环境变量覆盖）
+    # 推荐部署方式：在应用目录下创建 music-data/temp/ 子目录
+    # 默认值：${user.dir}/music-data/temp/（相对于应用部署目录）
+    # 环境变量：MUSIC_TEMP_PATH（可选，用于自定义路径）
+    #
+    # 部署示例：
+    # /opt/service/wangyiyun-music/
+    # ├── wangyiyun-music.jar
+    # ├── music-data/
+    # │   └── temp/               ← 临时文件存储在此
+    #
+    # 自定义路径示例：export MUSIC_TEMP_PATH=/data/music-data/temp/
+    temp-path: ${MUSIC_TEMP_PATH:${user.dir}/music-data/temp/}
     temp-file-retention-hours: 1            # 临时文件保留时间（小时）
     enable-auto-cleanup: true               # 是否启用自动清理
     cleanup-cron: "0 */30 * * * ?"          # 清理任务执行间隔（每30分钟）
@@ -132,7 +153,8 @@ video:
       - YOUTUBE                    # 预留
 
 ---
-# 开发环境（Windows）
+# 开发环境配置（Windows）
+# 说明：默认配置已包含 Windows 开发环境路径，此 profile 仅覆盖 yt-dlp 可执行文件路径
 spring:
   config:
     activate:
@@ -141,10 +163,21 @@ spring:
 video:
   parser:
     yt-dlp-executable: ${user.dir}/tools/yt-dlp.exe
-    temp-path: D:/music-data/temp/
 
 ---
-# 生产环境（Linux）
+# 生产环境配置（Linux）
+# 推荐部署方式：在应用目录下创建 music-data 子目录，无需额外配置
+# 部署步骤：
+#   1. 创建部署目录：mkdir -p /opt/service/wangyiyun-music
+#   2. 复制 JAR 包：cp target/wangyiyun-music-*.jar /opt/service/wangyiyun-music/
+#   3. 创建数据目录：cd /opt/service/wangyiyun-music && mkdir -p music-data/{temp,audio}
+#   4. 安装 yt-dlp：wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O tools/yt-dlp && chmod +x tools/yt-dlp
+#   5. 启动应用：java -jar wangyiyun-music-*.jar --spring.profiles.active=prod
+#
+# 高级配置（可选）：
+#   如需自定义路径，可使用环境变量：
+#   export MUSIC_TEMP_PATH=/data/music-data/temp/
+#   export MUSIC_AUDIO_PATH=file:/data/music-data/audio/
 spring:
   config:
     activate:
@@ -152,5 +185,4 @@ spring:
 
 video:
   parser:
-    yt-dlp-executable: /usr/local/bin/yt-dlp
-    temp-path: /data/music-data/temp/
+    yt-dlp-executable: ${user.dir}/tools/yt-dlp  # 相对路径，与应用在同一目录

@@ -32,5 +32,23 @@ build/
 ### VS Code ###
 .vscode/
 
+### Application ###
 /tools/
 app.log
+
+### Environment & Secrets ###
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+
+### Logs ###
+logs/
+*.log
+*.log.*
+
+### Deployment ###
+deploy/
+*.backup
