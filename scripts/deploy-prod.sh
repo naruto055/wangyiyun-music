@@ -1,10 +1,24 @@
 #!/bin/bash
 
 ###############################################################################
-# 网易云音乐项目 - 生产环境部署脚本
-# 说明：自动化部署到 Linux 服务器
+# 网易云音乐项目 - 一体化部署脚本（标准方案）
+#
+# 说明：
+#   - 所有文件（应用、数据、工具）在一个目录下
+#   - 零配置，开箱即用（依赖 ${user.dir} 自动解析路径）
+#   - 易备份、易迁移（整体打包即可）
+#   - 与 deploy-simple.sh 功能一致，可互换使用
+#
+# 适用场景：
+#   - 生产环境标准部署
+#   - 中小规模应用（数据量 < 100GB）
+#   - 需要稳定可靠的部署方案
+#
+# 部署目录：/opt/service/wangyiyun-music
+#
 # 作者：naruto
 # 创建时间：2026-01-31
+# 最后更新：2026-01-31
 ###############################################################################
 
 set -e  # 遇到错误立即退出
@@ -16,13 +30,13 @@ APP_NAME="wangyiyun-music"
 APP_VERSION="0.0.1-SNAPSHOT"
 APP_JAR="${APP_NAME}-${APP_VERSION}.jar"
 
-# 部署目录配置（可自定义）
-DEPLOY_DIR="/opt/${APP_NAME}"
+# 部署目录配置（与 deploy-simple.sh 保持一致）
+DEPLOY_DIR="/opt/service/${APP_NAME}"
 LOGS_DIR="${DEPLOY_DIR}/logs"
 TOOLS_DIR="${DEPLOY_DIR}/tools"
 
-# 数据存储目录配置（可自定义）
-DATA_ROOT="/data/music-data"
+# 数据存储目录配置（一体化部署，所有文件在应用目录下）
+DATA_ROOT="${DEPLOY_DIR}/music-data"
 TEMP_DIR="${DATA_ROOT}/temp"
 AUDIO_DIR="${DATA_ROOT}/audio"
 
@@ -126,16 +140,16 @@ function create_directories() {
 # ==================== 安装 yt-dlp ====================
 
 function install_ytdlp() {
-    log_step "安装 yt-dlp 工具..."
+    log_step "安装 yt-dlp 工具到应用目录..."
 
-    YTDLP_PATH="/usr/local/bin/yt-dlp"
+    YTDLP_PATH="${DEPLOY_DIR}/tools/yt-dlp"
 
     if [[ -f ${YTDLP_PATH} ]]; then
         log_warn "yt-dlp 已存在，跳过安装"
     else
         wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O ${YTDLP_PATH}
         chmod +x ${YTDLP_PATH}
-        log_info "yt-dlp 安装成功"
+        log_info "yt-dlp 安装成功: ${YTDLP_PATH}"
     fi
 
     # 验证安装
@@ -200,12 +214,14 @@ Type=simple
 User=${APP_USER}
 WorkingDirectory=${DEPLOY_DIR}
 
-# 环境变量配置
-Environment="MUSIC_TEMP_PATH=${TEMP_DIR}/"
-Environment="MUSIC_AUDIO_PATH=file:${AUDIO_DIR}/"
+# JVM 参数配置（路径使用 \${user.dir} 自动解析，无需环境变量）
 Environment="JAVA_OPTS=${JAVA_OPTS}"
 
 # 启动命令
+# 说明：
+# - 工作目录设置为 ${DEPLOY_DIR}
+# - 应用会自动使用 music-data/temp 和 music-data/audio 子目录
+# - 无需配置环境变量，开箱即用
 ExecStart=/usr/bin/java \$JAVA_OPTS \\
   -jar ${DEPLOY_DIR}/${APP_JAR} \\
   --spring.profiles.active=${SPRING_PROFILE} \\
