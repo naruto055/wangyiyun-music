@@ -1,0 +1,310 @@
+{
+  "metadata": {
+    "project_name": "wangyiyun-music",
+    "description": "基于 Spring Boot 的网易云音乐后端服务系统",
+    "version": "0.0.1-SNAPSHOT",
+    "language": "Java",
+    "framework": "Spring Boot 3.1.0",
+    "last_scan_time": "2026-02-01T15:50:45+08:00",
+    "scan_strategy": "adaptive-mixed",
+    "coverage": {
+      "total_files_estimated": 100,
+      "scanned_files": 96,
+      "coverage_percentage": 96,
+      "ignored_patterns": [
+        "target/**",
+        ".idea/**",
+        "*.iml",
+        "*.log",
+        "music-data/**",
+        "tools/**"
+      ]
+    }
+  },
+  "modules": [
+    {
+      "name": "controller",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/controller",
+      "type": "presentation",
+      "description": "RESTful API 控制器层",
+      "file_count": 11,
+      "key_files": [
+        "MusicController.java",
+        "ArtistController.java",
+        "AlbumController.java",
+        "FavoriteController.java",
+        "AudioController.java",
+        "VideoParseController.java",
+        "PlayRecordController.java",
+        "CategoryController.java",
+        "TagController.java",
+        "MusicArtistController.java",
+        "MusicTagController.java"
+      ],
+      "api_endpoints": [
+        "GET /api/music/list - 获取音乐列表",
+        "GET /api/music/{id} - 获取音乐详情",
+        "GET /api/artist/{id} - 获取歌手详情",
+        "GET /api/album/{id} - 获取专辑详情",
+        "GET /api/audio/{musicId} - 获取音频访问URL",
+        "POST /api/video/parse - 解析视频并提取音频"
+      ],
+      "coverage": {
+        "has_interfaces": true,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "service",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/service",
+      "type": "business",
+      "description": "业务逻辑服务层",
+      "file_count": 29,
+      "key_files": [
+        "MusicService.java",
+        "AudioService.java",
+        "VideoParseService.java",
+        "YtDlpService.java",
+        "FileValidationService.java",
+        "TempFileCleanupService.java",
+        "ArtistNameService.java"
+      ],
+      "subdirectories": [
+        "impl - 服务实现类",
+        "strategy - 策略模式（视频平台解析）"
+      ],
+      "coverage": {
+        "has_interfaces": true,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "mapper",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/mapper",
+      "type": "persistence",
+      "description": "MyBatis-Plus 数据访问层",
+      "file_count": 9,
+      "key_files": [
+        "MusicMapper.java",
+        "ArtistMapper.java",
+        "AlbumMapper.java",
+        "FavoriteMapper.java",
+        "PlayRecordMapper.java"
+      ],
+      "xml_mappers": [
+        "src/main/resources/mapper/MusicMapper.xml",
+        "src/main/resources/mapper/ArtistMapper.xml",
+        "src/main/resources/mapper/AlbumMapper.xml"
+      ],
+      "coverage": {
+        "has_interfaces": true,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "model",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/model",
+      "type": "data",
+      "description": "数据模型（实体、DTO、VO）",
+      "file_count": 17,
+      "subdirectories": [
+        "entity - 数据库实体类（9个）",
+        "dto - 数据传输对象（3个）",
+        "vo - 视图对象（5个）",
+        "enums - 枚举类型（1个）"
+      ],
+      "key_files": [
+        "entity/Music.java",
+        "entity/Artist.java",
+        "entity/Album.java",
+        "vo/AudioUrlVO.java",
+        "vo/VideoParseResultVO.java",
+        "dto/VideoParseRequestDTO.java",
+        "enums/VideoPlatform.java"
+      ],
+      "coverage": {
+        "has_interfaces": false,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "config",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/config",
+      "type": "configuration",
+      "description": "Spring 配置类",
+      "file_count": 7,
+      "key_files": [
+        "MybatisPlusConfig.java",
+        "OpenApiConfig.java",
+        "WebMvcConfig.java",
+        "VideoParseConfig.java",
+        "ScheduleConfig.java",
+        "GlobalResponseAdvice.java"
+      ],
+      "subdirectories": [
+        "properties - 配置属性类"
+      ],
+      "coverage": {
+        "has_interfaces": false,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "filter",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/filter",
+      "type": "middleware",
+      "description": "过滤器（限流、防盗链）",
+      "file_count": 2,
+      "key_files": [
+        "AudioRateLimitFilter.java - 音频限流过滤器",
+        "AntiLeechFilter.java - 防盗链过滤器"
+      ],
+      "coverage": {
+        "has_interfaces": false,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "exception",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/exception",
+      "type": "infrastructure",
+      "description": "异常处理",
+      "file_count": 6,
+      "key_files": [
+        "GlobalExceptionHandler.java",
+        "BusinessException.java",
+        "VideoParseException.java",
+        "RateLimitException.java",
+        "AntiLeechException.java",
+        "FileValidationException.java",
+        "StorageCapacityException.java"
+      ],
+      "coverage": {
+        "has_interfaces": false,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "common",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/common",
+      "type": "infrastructure",
+      "description": "公共类（统一响应）",
+      "file_count": 1,
+      "key_files": [
+        "Result.java - 统一响应封装类"
+      ],
+      "coverage": {
+        "has_interfaces": false,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "annotation",
+      "path": "src/main/java/com/naruto/wangyiyunmusic/annotation",
+      "type": "infrastructure",
+      "description": "自定义注解",
+      "file_count": 1,
+      "key_files": [
+        "IgnoreResponseWrap.java - 忽略响应封装注解"
+      ],
+      "coverage": {
+        "has_interfaces": false,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "resources",
+      "path": "src/main/resources",
+      "type": "configuration",
+      "description": "应用配置文件",
+      "file_count": 11,
+      "key_files": [
+        "application.yaml - 主配置文件",
+        "logback-spring.xml - 日志配置",
+        "mapper/*.xml - MyBatis XML 映射文件（9个）"
+      ],
+      "coverage": {
+        "has_interfaces": false,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    }
+  ],
+  "important_paths": {
+    "entry_point": "src/main/java/com/naruto/wangyiyunmusic/WangyiyunMusicApplication.java",
+    "main_config": "src/main/resources/application.yaml",
+    "build_file": "pom.xml",
+    "documentation": "CLAUDE.md"
+  },
+  "technologies": {
+    "language": "Java 17",
+    "framework": "Spring Boot 3.1.0",
+    "build_tool": "Maven",
+    "database": "MySQL 8.0+",
+    "orm": "MyBatis-Plus 3.5.5",
+    "connection_pool": "Druid 1.2.21",
+    "api_doc": "SpringDoc OpenAPI 2.3.0",
+    "utilities": [
+      "Lombok",
+      "FastJson2 2.0.43",
+      "Guava 32.1.3",
+      "Hutool 5.8.32"
+    ]
+  },
+  "new_features": [
+    {
+      "name": "视频解析服务",
+      "description": "支持 B 站、YouTube 视频解析并提取音频",
+      "modules": [
+        "VideoParseController",
+        "VideoParseService",
+        "YtDlpService",
+        "VideoPlatformStrategy（策略模式）"
+      ],
+      "status": "新增"
+    },
+    {
+      "name": "音频资源安全",
+      "description": "音频文件限流防盗链功能",
+      "modules": [
+        "AudioRateLimitFilter",
+        "AntiLeechFilter",
+        "AudioRateLimitService",
+        "AntiLeechService"
+      ],
+      "status": "新增"
+    },
+    {
+      "name": "临时文件管理",
+      "description": "定时清理过期临时音频文件",
+      "modules": [
+        "TempFileCleanupService",
+        "ScheduleConfig"
+      ],
+      "status": "新增"
+    }
+  ],
+  "gaps": {
+    "missing_tests": [
+      "controller/**",
+      "service/**",
+      "filter/**"
+    ],
+    "missing_documentation": [],
+    "recommended_next_steps": [
+      "补充单元测试（建议覆盖率 > 80%）",
+      "为新增的视频解析模块添加集成测试",
+      "为音频安全过滤器添加测试用例",
+      "补充 API 使用示例和最佳实践文档"
+    ]
+  }
+}
