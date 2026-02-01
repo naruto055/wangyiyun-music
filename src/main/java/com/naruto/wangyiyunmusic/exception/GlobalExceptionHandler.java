@@ -1,7 +1,9 @@
 package com.naruto.wangyiyunmusic.exception;
 
 import com.naruto.wangyiyunmusic.common.Result;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,6 +55,26 @@ public class GlobalExceptionHandler {
     public Result<Void> handleStorageCapacityException(StorageCapacityException e) {
         log.error("存储容量异常: {}", e.getMessage());
         return Result.error("存储空间不足: " + e.getMessage());
+    }
+
+    /**
+     * 限流异常处理
+     */
+    @ExceptionHandler(RateLimitException.class)
+    public Result<Void> handleRateLimitException(RateLimitException e, HttpServletResponse response) {
+        log.warn("限流触发 - IP: {}, 类型: {}, 消息: {}", e.getIp(), e.getLimitType(), e.getMessage());
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value()); // 429
+        return Result.build(429, e.getMessage(), null);
+    }
+
+    /**
+     * 防盗链异常处理
+     */
+    @ExceptionHandler(AntiLeechException.class)
+    public Result<Void> handleAntiLeechException(AntiLeechException e, HttpServletResponse response) {
+        log.warn("防盗链拦截 - IP: {}, 原因: {}, 消息: {}", e.getIp(), e.getReason(), e.getMessage());
+        response.setStatus(HttpStatus.FORBIDDEN.value()); // 403
+        return Result.build(403, e.getMessage(), null);
     }
 
     /**
