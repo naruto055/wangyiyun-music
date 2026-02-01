@@ -46,9 +46,12 @@ secrets/
 
 ### Logs ###
 logs/
+!logs/.gitkeep
 *.log
 *.log.*
 
 ### Deployment ###
 deploy/
 *.backup
+
+/music-data

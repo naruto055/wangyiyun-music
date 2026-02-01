@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--
+        Logback 日志配置文件
+
+        功能说明：
+        1. 支持多环境配置（dev/prod）
+        2. 控制台 + 文件双输出
+        3. 错误日志单独文件
+        4. 按日期和大小自动滚动
+        5. UTF-8 编码支持中文
+    -->
+
+    <!-- 日志文件存储路径 -->
+    <property name="LOG_HOME" value="./logs"/>
+    <property name="APP_NAME" value="wangyiyun-music"/>
+
+    <!-- 日志输出格式 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"/>
+
+    <!-- 控制台输出配置 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <!-- 移除过滤器，控制台输出所有级别的日志（包括 DEBUG） -->
+        <!-- 说明：日志级别由 logger 配置控制，appender 不再过滤 -->
+    </appender>
+
+    <!-- 所有日志文件输出配置 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前日志文件路径 -->
+        <file>${LOG_HOME}/${APP_NAME}.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+        <!-- 滚动策略：按日期和大小 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 历史日志文件命名格式：wangyiyun-music-2026-01-31.0.log.gz -->
+            <!-- 使用 .gz 后缀，Logback 会自动使用 GZIP 压缩归档日志 -->
+            <fileNamePattern>${LOG_HOME}/archive/${APP_NAME}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- 单个文件最大大小 -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 保留天数 -->
+            <maxHistory>30</maxHistory>
+            <!-- 所有日志文件总大小上限（压缩后的大小） -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 错误日志单独文件输出配置 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${APP_NAME}-error.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+        <!-- 只记录 ERROR 级别的日志 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 使用 .gz 后缀，自动压缩错误日志 -->
+            <fileNamePattern>${LOG_HOME}/archive/${APP_NAME}-error-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- ========== 多环境配置 ========== -->
+
+    <!-- 开发环境配置 -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+
+        <!-- Mapper 层 SQL 日志 -->
+        <logger name="com.naruto.wangyiyunmusic.mapper" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </logger>
+
+        <!-- Service 层日志（所有 Service 的基础级别） -->
+        <!-- 说明：所有 Service 都会输出 INFO 及以上级别的日志 -->
+        <logger name="com.naruto.wangyiyunmusic.service" level="INFO"/>
+
+        <!-- 视频解析相关服务（新功能，需要详细调试日志） -->
+        <logger name="com.naruto.wangyiyunmusic.service.impl.VideoParseServiceImpl" level="DEBUG"/>
+        <logger name="com.naruto.wangyiyunmusic.service.impl.YtDlpServiceImpl" level="DEBUG"/>
+        <logger name="com.naruto.wangyiyunmusic.service.impl.FileValidationServiceImpl" level="DEBUG"/>
+
+        <!-- 音频服务日志（涉及文件操作，需要详细日志） -->
+        <logger name="com.naruto.wangyiyunmusic.service.impl.AudioServiceImpl" level="DEBUG"/>
+
+        <!-- 临时文件清理日志（定时任务，需要监控执行情况） -->
+        <logger name="com.naruto.wangyiyunmusic.service.impl.TempFileCleanupServiceImpl" level="DEBUG"/>
+
+        <!-- 其他 Service（如 MusicServiceImpl、ArtistServiceImpl 等）继承上面的 INFO 级别 -->
+        <!-- 它们会输出 INFO/WARN/ERROR 日志，不会输出 DEBUG 日志 -->
+    </springProfile>
+
+    <!-- 生产环境配置 -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+
+        <!-- 生产环境只记录 INFO 级别的 SQL 日志 -->
+        <logger name="com.naruto.wangyiyunmusic.mapper" level="INFO" additivity="false">
+            <appender-ref ref="FILE"/>
+        </logger>
+
+        <!-- 关键业务日志 -->
+        <logger name="com.naruto.wangyiyunmusic.service" level="INFO"/>
+    </springProfile>
+
+    <!-- 默认配置（未指定环境时使用） -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+
+    <!-- Mapper 层日志（默认环境） -->
+    <logger name="com.naruto.wangyiyunmusic.mapper" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- Spring 框架日志 -->
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.web" level="INFO"/>
+
+    <!-- MyBatis 日志 -->
+    <logger name="org.apache.ibatis" level="INFO"/>
+
+    <!-- Druid 数据源日志 -->
+    <logger name="com.alibaba.druid" level="INFO"/>
+</configuration>
