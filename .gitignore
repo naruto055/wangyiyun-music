@@ -55,3 +55,17 @@ deploy/
 *.backup
 
 /music-data
+
+### BMad Method 工作流输出（运行时生成）###
+_bmad-output/
+
+### Spec Workflow 运行时状态（不提交审批和归档）###
+.spec-workflow/approvals/
+.spec-workflow/archive/
+
+### Claude Code 临时文件 ###
+.claude/plans/
+
+### BMad Method 安装产物（如使用 bmad-method install）###
+.bmad-core/
+.claude/commands/BMad/
