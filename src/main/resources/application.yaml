@@ -41,12 +41,25 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 # 日志配置
+# 说明：
+# 1. 本文件仅配置框架级别的日志（Spring、MyBatis等），不随环境变化
+# 2. 业务包的日志级别（mapper、service等）由 logback-spring.xml 根据环境（dev/prod）自动管理
+# 3. 如需临时调试，可通过启动参数覆盖：--logging.level.com.naruto.wangyiyunmusic.mapper=TRACE
 logging:
   level:
-    # Mapper 层 SQL 日志（开发环境建议 debug，生产环境建议 info）
-    com.naruto.wangyiyunmusic.mapper: debug
-    # 音频服务日志（记录音频URL生成和访问情况）
-    com.naruto.wangyiyunmusic.service.impl.AudioServiceImpl: info
+    root: INFO                        # 根日志级别
+    # Spring 框架日志
+    org.springframework: INFO
+    org.springframework.web: INFO
+    # MyBatis 框架日志
+    org.apache.ibatis: INFO
+    # Druid 数据源日志
+    com.alibaba.druid: INFO
+
+  # 业务包日志级别由 logback-spring.xml 管理：
+  # - 开发环境（dev）：mapper=DEBUG, service=DEBUG
+  # - 生产环境（prod）：mapper=INFO, service=INFO
+  # - 默认环境：mapper=DEBUG, service=INFO
 
 # SpringDoc OpenAPI 配置
 springdoc:
@@ -77,6 +90,18 @@ springdoc:
   cache:
     disabled: true
 
+# CORS 跨域配置
+cors:
+  # 允许的前端域名列表
+  allowed-origins:
+    - http://localhost:5174      # Vite 开发服务器
+    - http://127.0.0.1:5174
+    # 生产环境需要添加实际域名
+    # - https://music.example.com
+
+  # 预检请求缓存时间（秒）
+  max-age: 3600
+
 # 音频文件配置
 audio:
   # 音频文件存储的物理路径（支持环境变量覆盖）
@@ -103,6 +128,42 @@ audio:
   # 说明：前端通过此URL访问音频文件，需根据实际部署环境配置
   # 支持占位符：${server.port} 会自动替换为server.port的值
   server-base-url: http://localhost:${server.port}
+
+  # 音频安全配置
+  security:
+    # 限流配置
+    rate-limit:
+      enabled: true                           # 是否启用限流
+      range-requests-per-minute: 100          # Range请求限流（次/分钟/IP）
+      full-downloads-per-minute: 5            # 完整下载限流（次/分钟/IP）
+      unique-files-per-minute: 10             # 不同文件数限流（个/分钟/IP）
+      max-concurrent-connections: 3           # 并发连接数限制（个/IP）
+      blacklist-threshold: 20                 # 触发黑名单的违规次数阈值
+      window-minutes: 5                       # 统计窗口时长（分钟）
+
+    # 防盗链配置
+    anti-leech:
+      enabled: true                           # 是否启用防盗链
+      allowed-referers: # Referer白名单（域名列表）
+        - localhost:8910                      # 后端服务（Swagger UI）
+        - 127.0.0.1:8910                      # 后端服务（IP访问）
+        - localhost:5174                      # 前端开发服务器（Vite默认端口）
+        - 127.0.0.1:5174                      # 前端开发服务器（IP访问）
+        - music.example.com                   # 生产环境域名
+      allow-empty-referer: true               # 是否允许空Referer（直接访问）
+      blocked-user-agents: # User-Agent黑名单（正则表达式）
+        - ".*[Pp]ython.*"                     # Python爬虫
+        - ".*wget.*"                          # wget下载工具
+        - ".*curl.*"                          # curl命令行工具
+        - ".*[Ss]crapy.*"                     # Scrapy爬虫框架
+        - ".*[Bb]ot.*"                        # 通用爬虫（Bot）
+        - ".*[Ss]pider.*"                     # 通用爬虫（Spider）
+
+    # 黑名单配置
+    blacklist:
+      ips: [ ]                                 # 固定黑名单IP列表（可选）
+      ban-duration-minutes: 30                # 动态黑名单封禁时长（分钟）
+      cleanup-interval-minutes: 10            # 清理过期数据的间隔（分钟）
 
 # 视频解析配置
 video:
