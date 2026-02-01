@@ -54,4 +54,4 @@ logs/
 deploy/
 *.backup
 
-/music-datanul
+/music-data
