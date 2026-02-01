@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,10 +21,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     /**
-     * 参数校验异常
+     * 参数校验异常（表单参数）
      */
     @ExceptionHandler(BindException.class)
     public Result<Void> handleBindException(BindException e) {
+        log.error("参数校验失败", e);
+        FieldError fieldError = e.getBindingResult().getFieldError();
+        String message = fieldError != null ? fieldError.getDefaultMessage() : "参数校验失败";
+        return Result.error(message);
+    }
+
+    /**
+     * 参数校验异常（JSON参数）
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("参数校验失败", e);
         FieldError fieldError = e.getBindingResult().getFieldError();
         String message = fieldError != null ? fieldError.getDefaultMessage() : "参数校验失败";
