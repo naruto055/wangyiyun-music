@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: wangyiyun-music
+  main:
+    allow-circular-references: true
 
   # 数据源配置
   datasource:
