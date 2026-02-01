@@ -5,19 +5,22 @@
     "version": "0.0.1-SNAPSHOT",
     "language": "Java",
     "framework": "Spring Boot 3.1.0",
-    "last_scan_time": "2026-02-01T15:50:45+08:00",
+    "last_scan_time": "2026-02-01T20:19:20+08:00",
     "scan_strategy": "adaptive-mixed",
     "coverage": {
-      "total_files_estimated": 100,
-      "scanned_files": 96,
-      "coverage_percentage": 96,
+      "total_files_estimated": 105,
+      "scanned_files": 100,
+      "coverage_percentage": 95,
       "ignored_patterns": [
         "target/**",
         ".idea/**",
         "*.iml",
         "*.log",
         "music-data/**",
-        "tools/**"
+        "tools/**",
+        ".claude/**",
+        "_bmad/**",
+        ".zcf/**"
       ]
     }
   },
@@ -44,8 +47,16 @@
       "api_endpoints": [
         "GET /api/music/list - 获取音乐列表",
         "GET /api/music/{id} - 获取音乐详情",
+        "GET /api/artist/list - 分页查询歌手列表（支持名称、国家搜索，支持排序）",
         "GET /api/artist/{id} - 获取歌手详情",
-        "GET /api/album/{id} - 获取专辑详情",
+        "POST /api/artist - 创建歌手（含名称重复校验）",
+        "PUT /api/artist/{id} - 更新歌手信息（含名称重复校验）",
+        "DELETE /api/artist/{id} - 删除歌手（逻辑删除）",
+        "GET /api/album/list - 分页查询专辑列表（支持关键词搜索，支持排序，含歌曲数量）",
+        "GET /api/album/{id} - 获取专辑详情（含歌曲数量）",
+        "POST /api/album - 创建专辑",
+        "PUT /api/album/{id} - 更新专辑信息",
+        "DELETE /api/album/{id} - 删除专辑（含关联歌曲检查，逻辑删除）",
         "GET /api/audio/{musicId} - 获取音频访问URL",
         "POST /api/video/parse - 解析视频并提取音频"
       ],
@@ -60,14 +71,18 @@
       "path": "src/main/java/com/naruto/wangyiyunmusic/service",
       "type": "business",
       "description": "业务逻辑服务层",
-      "file_count": 29,
+      "file_count": 30,
       "key_files": [
         "MusicService.java",
+        "ArtistService.java",
+        "AlbumService.java",
         "AudioService.java",
         "VideoParseService.java",
         "YtDlpService.java",
         "FileValidationService.java",
         "TempFileCleanupService.java",
+        "AudioRateLimitService.java",
+        "AntiLeechService.java",
         "ArtistNameService.java"
       ],
       "subdirectories": [
@@ -91,12 +106,22 @@
         "ArtistMapper.java",
         "AlbumMapper.java",
         "FavoriteMapper.java",
-        "PlayRecordMapper.java"
+        "PlayRecordMapper.java",
+        "CategoryMapper.java",
+        "TagMapper.java",
+        "MusicArtistMapper.java",
+        "MusicTagMapper.java"
       ],
       "xml_mappers": [
         "src/main/resources/mapper/MusicMapper.xml",
         "src/main/resources/mapper/ArtistMapper.xml",
-        "src/main/resources/mapper/AlbumMapper.xml"
+        "src/main/resources/mapper/AlbumMapper.xml",
+        "src/main/resources/mapper/FavoriteMapper.xml",
+        "src/main/resources/mapper/PlayRecordMapper.xml",
+        "src/main/resources/mapper/CategoryMapper.xml",
+        "src/main/resources/mapper/TagMapper.xml",
+        "src/main/resources/mapper/MusicArtistMapper.xml",
+        "src/main/resources/mapper/MusicTagMapper.xml"
       ],
       "coverage": {
         "has_interfaces": true,
@@ -109,22 +134,57 @@
       "path": "src/main/java/com/naruto/wangyiyunmusic/model",
       "type": "data",
       "description": "数据模型（实体、DTO、VO）",
-      "file_count": 17,
+      "file_count": 30,
       "subdirectories": [
         "entity - 数据库实体类（9个）",
-        "dto - 数据传输对象（3个）",
-        "vo - 视图对象（5个）",
-        "enums - 枚举类型（1个）"
+        "dto - 数据传输对象（9个）",
+        "vo - 视图对象（9个）",
+        "enums - 枚举类型（1个）",
+        "internal - 内部实体（2个）"
       ],
-      "key_files": [
-        "entity/Music.java",
-        "entity/Artist.java",
-        "entity/Album.java",
-        "vo/AudioUrlVO.java",
-        "vo/VideoParseResultVO.java",
-        "dto/VideoParseRequestDTO.java",
-        "enums/VideoPlatform.java"
-      ],
+      "key_files": {
+        "entity": [
+          "Music.java",
+          "Artist.java",
+          "Album.java",
+          "Favorite.java",
+          "PlayRecord.java",
+          "Tag.java",
+          "Category.java",
+          "MusicArtist.java",
+          "MusicTag.java"
+        ],
+        "dto": [
+          "MusicQueryDTO.java",
+          "PlayRecordDTO.java",
+          "VideoParseRequestDTO.java",
+          "ArtistQueryDTO.java",
+          "ArtistCreateDTO.java",
+          "ArtistUpdateDTO.java",
+          "AlbumQueryDTO.java",
+          "AlbumCreateDTO.java",
+          "AlbumUpdateDTO.java"
+        ],
+        "vo": [
+          "MusicListVO.java",
+          "MusicDetailVO.java",
+          "ArtistVO.java",
+          "ArtistListVO.java",
+          "ArtistDetailVO.java",
+          "AlbumListVO.java",
+          "AlbumDetailVO.java",
+          "FavoriteVO.java",
+          "AudioUrlVO.java",
+          "VideoParseResultVO.java"
+        ],
+        "enums": [
+          "VideoPlatform.java"
+        ],
+        "internal": [
+          "YtDlpResult.java",
+          "ArtistNameFillable.java"
+        ]
+      },
       "coverage": {
         "has_interfaces": false,
         "has_tests": false,
@@ -262,6 +322,38 @@
   },
   "new_features": [
     {
+      "name": "歌手管理完整CRUD",
+      "description": "支持歌手的分页查询、详情查询、创建、更新、删除（逻辑删除），包含名称重复校验",
+      "modules": [
+        "ArtistController",
+        "ArtistService",
+        "ArtistServiceImpl",
+        "ArtistQueryDTO",
+        "ArtistCreateDTO",
+        "ArtistUpdateDTO",
+        "ArtistListVO",
+        "ArtistDetailVO"
+      ],
+      "status": "新增",
+      "date": "2026-02-01"
+    },
+    {
+      "name": "专辑管理完整CRUD",
+      "description": "支持专辑的分页查询、详情查询、创建、更新、删除（逻辑删除），包含歌曲数量统计和删除前关联检查",
+      "modules": [
+        "AlbumController",
+        "AlbumService",
+        "AlbumServiceImpl",
+        "AlbumQueryDTO",
+        "AlbumCreateDTO",
+        "AlbumUpdateDTO",
+        "AlbumListVO (含歌曲数量)",
+        "AlbumDetailVO (含歌曲数量)"
+      ],
+      "status": "新增",
+      "date": "2026-02-01"
+    },
+    {
       "name": "视频解析服务",
       "description": "支持 B 站、YouTube 视频解析并提取音频",
       "modules": [
@@ -270,7 +362,8 @@
         "YtDlpService",
         "VideoPlatformStrategy（策略模式）"
       ],
-      "status": "新增"
+      "status": "已实现",
+      "date": "2026-02-01"
     },
     {
       "name": "音频资源安全",
@@ -281,7 +374,8 @@
         "AudioRateLimitService",
         "AntiLeechService"
       ],
-      "status": "新增"
+      "status": "已实现",
+      "date": "2026-02-01"
     },
     {
       "name": "临时文件管理",
@@ -290,7 +384,8 @@
         "TempFileCleanupService",
         "ScheduleConfig"
       ],
-      "status": "新增"
+      "status": "已实现",
+      "date": "2026-02-01"
     }
   ],
   "gaps": {
@@ -302,9 +397,21 @@
     "missing_documentation": [],
     "recommended_next_steps": [
       "补充单元测试（建议覆盖率 > 80%）",
+      "为歌手、专辑CRUD功能添加集成测试",
       "为新增的视频解析模块添加集成测试",
       "为音频安全过滤器添加测试用例",
       "补充 API 使用示例和最佳实践文档"
     ]
+  },
+  "statistics": {
+    "java_files_total": 100,
+    "controllers": 11,
+    "services": 30,
+    "entities": 9,
+    "dto_count": 9,
+    "vo_count": 9,
+    "filters": 2,
+    "exceptions": 6,
+    "configs": 7
   }
 }

@@ -2,7 +2,7 @@
 
 > 基于 Spring Boot 的网易云音乐后端服务系统
 
-**文档生成时间**: 2026-02-01 15:50:45
+**文档生成时间**: 2026-02-01 20:19:20
 **项目版本**: 0.0.1-SNAPSHOT
 **技术栈**: Spring Boot 3.1.0 + Java 17 + Maven + MySQL + MyBatis-Plus
 
@@ -10,7 +10,22 @@
 
 ## 变更记录 (Changelog)
 
-### 2026-02-01
+### 2026-02-01 20:19
+- **增量更新项目 AI 上下文文档**
+- **新增歌手管理完整CRUD功能**
+  - ArtistController: 分页查询、详情、创建、更新、删除（逻辑删除）
+  - ArtistService: 业务逻辑实现，包含名称重复校验
+  - ArtistQueryDTO、ArtistCreateDTO、ArtistUpdateDTO
+  - ArtistListVO、ArtistDetailVO
+- **新增专辑管理完整CRUD功能**
+  - AlbumController: 分页查询、详情、创建、更新、删除（逻辑删除）
+  - AlbumService: 业务逻辑实现，包含歌曲数量统计和删除前关联检查
+  - AlbumQueryDTO、AlbumCreateDTO、AlbumUpdateDTO
+  - AlbumListVO、AlbumDetailVO（包含歌曲数量字段）
+- **更新API端点索引**（新增歌手、专辑增删改查接口）
+- **统计分析**: 100 个 Java 文件，11 个控制器，30 个服务类，6 个 DTO，7 个 VO
+
+### 2026-02-01 15:50
 - 增量更新项目 AI 上下文文档
 - 新增视频解析模块文档（B站/YouTube视频转音频）
 - 新增音频资源安全模块文档（限流 + 防盗链）
@@ -36,8 +51,8 @@
 
 ### 核心功能
 - ✅ **音乐管理服务**: 歌曲查询、播放URL获取、音乐列表、音乐详情
-- ✅ **歌手管理服务**: 歌手信息查询、歌手作品列表
-- ✅ **专辑管理服务**: 专辑信息查询、专辑歌曲列表
+- ✅ **歌手管理服务**: 歌手CRUD、分页查询、名称重复校验（完整实现）
+- ✅ **专辑管理服务**: 专辑CRUD、歌曲数量统计、删除前关联检查（完整实现）
 - ✅ **收藏管理服务**: 用户收藏歌曲、收藏列表管理
 - ✅ **播放记录服务**: 播放历史记录、播放统计
 - ✅ **分类标签服务**: 音乐分类、标签管理
@@ -63,6 +78,7 @@
 - ✅ **已完成**: 统一响应封装、全局异常处理、Swagger API 文档
 - ✅ **已完成**: 音频资源URL映射功能
 - ✅ **已完成**: 视频解析服务（B站支持）、音频限流防盗链、临时文件定时清理
+- ✅ **已完成**: 歌手表完整CRUD、专辑表完整CRUD（含业务校验）
 - 🚧 **进行中**: 功能优化与测试完善
 - 📅 **待开发**: 用户认证授权、缓存集成、性能优化、YouTube 支持完善
 
@@ -77,9 +93,9 @@ graph TD
     Root["(根) wangyiyun-music<br/>网易云音乐后端"]
 
     Root --> Controller["controller<br/>控制器层（11个）"]
-    Root --> Service["service<br/>服务层（29个）"]
+    Root --> Service["service<br/>服务层（30个）"]
     Root --> Mapper["mapper<br/>数据访问层（9个）"]
-    Root --> Model["model<br/>数据模型（17个）"]
+    Root --> Model["model<br/>数据模型（30个）"]
     Root --> Config["config<br/>配置类（7个）"]
     Root --> Filter["filter<br/>过滤器（2个）"]
     Root --> Exception["exception<br/>异常处理（6个）"]
@@ -90,9 +106,10 @@ graph TD
     Service --> Strategy["strategy<br/>策略模式"]
 
     Model --> Entity["entity<br/>实体类（9个）"]
-    Model --> DTO["dto<br/>传输对象（3个）"]
-    Model --> VO["vo<br/>视图对象（5个）"]
+    Model --> DTO["dto<br/>传输对象（9个）"]
+    Model --> VO["vo<br/>视图对象（9个）"]
     Model --> Enums["enums<br/>枚举（1个）"]
+    Model --> Internal["internal<br/>内部实体（2个）"]
 
     Config --> Properties["properties<br/>配置属性"]
 
@@ -138,8 +155,8 @@ graph TB
 
     subgraph "业务层 Business Layer"
         MusicService[音乐服务]
-        ArtistService[歌手服务]
-        AlbumService[专辑服务]
+        ArtistService[歌手服务<br/>CRUD + 名称校验]
+        AlbumService[专辑服务<br/>CRUD + 歌曲统计]
         FavoriteService[收藏服务]
         AudioService[音频服务]
         VideoParseService[视频解析服务]
@@ -266,8 +283,8 @@ graph TB
 | 控制器 | API 路径 | 说明 |
 |-------|---------|------|
 | **MusicController** | `/api/music/*` | 音乐管理（列表、详情） |
-| **ArtistController** | `/api/artist/*` | 歌手管理（详情） |
-| **AlbumController** | `/api/album/*` | 专辑管理（详情） |
+| **ArtistController** | `/api/artist/*` | 歌手管理（列表、详情、创建、更新、删除） |
+| **AlbumController** | `/api/album/*` | 专辑管理（列表、详情、创建、更新、删除） |
 | **FavoriteController** | `/api/favorite/*` | 收藏管理 |
 | **PlayRecordController** | `/api/playrecord/*` | 播放记录管理 |
 | **AudioController** | `/api/audio/*` | 音频资源访问（支持 Range 请求） |
@@ -278,10 +295,26 @@ graph TB
 | **MusicTagController** | `/api/music-tag/*` | 音乐-标签关联 |
 
 **主要 API 端点**:
+
+**音乐管理**:
 - `GET /api/music/list` - 获取音乐列表（分页）
 - `GET /api/music/{id}` - 获取音乐详情
+
+**歌手管理（新增完整CRUD）**:
+- `GET /api/artist/list` - 分页查询歌手列表（支持名称、国家搜索，支持排序）
 - `GET /api/artist/{id}` - 获取歌手详情
-- `GET /api/album/{id}` - 获取专辑详情
+- `POST /api/artist` - 创建歌手（含名称重复校验）
+- `PUT /api/artist/{id}` - 更新歌手信息（含名称重复校验）
+- `DELETE /api/artist/{id}` - 删除歌手（逻辑删除）
+
+**专辑管理（新增完整CRUD）**:
+- `GET /api/album/list` - 分页查询专辑列表（支持关键词搜索，支持排序，含歌曲数量）
+- `GET /api/album/{id}` - 获取专辑详情（含歌曲数量）
+- `POST /api/album` - 创建专辑
+- `PUT /api/album/{id}` - 更新专辑信息
+- `DELETE /api/album/{id}` - 删除专辑（含关联歌曲检查，逻辑删除）
+
+**其他服务**:
 - `GET /api/audio/{musicId}` - 获取音频访问URL（支持HTTP Range请求）
 - `POST /api/video/parse` - 解析视频并提取音频（B站/YouTube）
 
@@ -291,13 +324,15 @@ graph TB
 
 **路径**: `src/main/java/com/naruto/wangyiyunmusic/service/`
 **职责**: 实现核心业务逻辑、处理事务管理、调用 Mapper 层访问数据
-**文件数量**: 29个（接口 + 实现）
+**文件数量**: 30个（接口 + 实现）
 
 **核心服务**:
 
 | 服务 | 说明 | 特性 |
 |------|------|------|
 | **MusicService** | 音乐业务服务 | 音乐列表查询、详情获取 |
+| **ArtistService** | 歌手业务服务 | 分页查询、CRUD操作、名称重复校验 |
+| **AlbumService** | 专辑业务服务 | 分页查询、CRUD操作、歌曲数量统计、删除关联检查 |
 | **AudioService** | 音频资源服务 | 音频URL拼接、Range 请求支持 |
 | **VideoParseService** | 视频解析服务 | 协调解析流程、策略选择、文件验证 |
 | **YtDlpService** | yt-dlp 工具服务 | 调用外部工具、解析结果处理 |
@@ -335,7 +370,7 @@ graph TB
 
 **路径**: `src/main/java/com/naruto/wangyiyunmusic/model/`
 **职责**: 定义数据库实体类、数据传输对象、视图对象
-**文件数量**: 17个
+**文件数量**: 30个
 
 #### 4.1 Entity (实体类) - 9个
 - `Music.java` - 音乐实体
@@ -348,24 +383,35 @@ graph TB
 - `MusicArtist.java` - 音乐-歌手关联实体
 - `MusicTag.java` - 音乐-标签关联实体
 
-#### 4.2 VO (视图对象) - 5个
+#### 4.2 VO (视图对象) - 9个
 - `MusicListVO.java` - 音乐列表视图对象
 - `MusicDetailVO.java` - 音乐详情视图对象
 - `ArtistVO.java` - 歌手视图对象
+- **`ArtistListVO.java`** - 歌手列表视图对象（新增）
+- **`ArtistDetailVO.java`** - 歌手详情视图对象（新增）
+- **`AlbumListVO.java`** - 专辑列表视图对象（新增，含歌曲数量）
+- **`AlbumDetailVO.java`** - 专辑详情视图对象（新增，含歌曲数量）
 - `FavoriteVO.java` - 收藏视图对象
 - `AudioUrlVO.java` - 音频URL视图对象
 - `VideoParseResultVO.java` - 视频解析结果视图对象
 
-#### 4.3 DTO (数据传输对象) - 3个
+#### 4.3 DTO (数据传输对象) - 9个
 - `MusicQueryDTO.java` - 音乐查询参数对象
 - `PlayRecordDTO.java` - 播放记录传输对象
 - `VideoParseRequestDTO.java` - 视频解析请求参数对象
+- **`ArtistQueryDTO.java`** - 歌手查询参数对象（新增）
+- **`ArtistCreateDTO.java`** - 歌手创建参数对象（新增）
+- **`ArtistUpdateDTO.java`** - 歌手更新参数对象（新增）
+- **`AlbumQueryDTO.java`** - 专辑查询参数对象（新增）
+- **`AlbumCreateDTO.java`** - 专辑创建参数对象（新增）
+- **`AlbumUpdateDTO.java`** - 专辑更新参数对象（新增）
 
 #### 4.4 Enums (枚举) - 1个
 - `VideoPlatform.java` - 视频平台枚举（BILIBILI, YOUTUBE）
 
-#### 4.5 Internal Entity - 1个
+#### 4.5 Internal Entity - 2个
 - `YtDlpResult.java` - yt-dlp 解析结果内部实体
+- `ArtistNameFillable.java` - 歌手名称填充接口
 
 ---
 
@@ -557,8 +603,11 @@ public AudioUrlVO getAudioUrl(Long musicId) {
 | 查询单个 | GET | `/api/music/{id}` | 获取音乐详情 |
 | 创建 | POST | `/api/favorite` | 添加收藏 |
 | 创建 | POST | `/api/video/parse` | 解析视频并提取音频 |
+| 创建 | POST | `/api/artist` | 创建歌手 |
 | 更新 | PUT | `/api/music/{id}` | 更新音乐信息 |
+| 更新 | PUT | `/api/artist/{id}` | 更新歌手信息 |
 | 删除 | DELETE | `/api/favorite/{id}` | 取消收藏 |
+| 删除 | DELETE | `/api/album/{id}` | 删除专辑（逻辑删除） |
 
 **响应格式**（统一 Result 封装）:
 ```json
@@ -670,6 +719,8 @@ mvn clean test jacoco:report
 ### 推荐测试重点
 1. **Controller 层**: API 接口测试（MockMvc）
 2. **Service 层**: 业务逻辑单元测试（Mockito）
+   - 重点：ArtistService（名称重复校验）
+   - 重点：AlbumService（歌曲数量统计、删除关联检查）
 3. **Filter 层**: 过滤器功能测试（限流、防盗链）
 4. **Strategy 层**: 策略模式测试（视频平台解析）
 5. **异常处理**: 异常捕获和响应测试
@@ -686,6 +737,7 @@ mvn clean test jacoco:report
 - **策略模式**: 使用策略模式实现多平台扩展（如 VideoPlatformStrategy）
 - **统一异常处理**: 使用 `@ControllerAdvice` 统一捕获异常
 - **日志规范**: 使用 SLF4J + Logback 记录日志
+- **业务校验**: 创建前校验重复、删除前检查关联（如 AlbumService）
 
 ### 日志规范
 使用 SLF4J + Logback 记录日志：
@@ -747,28 +799,31 @@ public class AudioServiceImpl implements AudioService {
 ## 项目元数据
 
 ### 统计信息
-- **Java 文件总数**: 96个
+- **Java 文件总数**: 100个
 - **控制器数量**: 11个
-- **服务类数量**: 29个
+- **服务类数量**: 30个（接口 15 + 实现 15）
 - **实体类数量**: 9个
+- **DTO数量**: 9个
+- **VO数量**: 9个
 - **过滤器数量**: 2个
 - **异常类数量**: 6个
 - **配置类数量**: 7个
 
 ### 覆盖率报告
 - **扫描策略**: 自适应混合（轻量清点 + 模块优先扫描）
-- **总文件估算**: ~100个
-- **已扫描文件**: 96个
-- **覆盖率**: ~96%
-- **忽略模式**: `target/**, .idea/**, *.iml, *.log, music-data/**, tools/**`
+- **总文件估算**: ~105个
+- **已扫描文件**: 100个
+- **覆盖率**: ~95%
+- **忽略模式**: `target/**, .idea/**, *.iml, *.log, music-data/**, tools/**, .claude/**, _bmad/**, .zcf/**`
 
 ### 主要缺口
 - **缺少测试**: controller/**, service/**, filter/**
 - **推荐下一步**:
   1. 补充单元测试（建议覆盖率 > 80%）
-  2. 为新增的视频解析模块添加集成测试
-  3. 为音频安全过滤器添加测试用例
-  4. 补充 API 使用示例和最佳实践文档
+  2. 为歌手、专辑CRUD功能添加集成测试
+  3. 为新增的视频解析模块添加集成测试
+  4. 为音频安全过滤器添加测试用例
+  5. 补充 API 使用示例和最佳实践文档
 
 ---
 
