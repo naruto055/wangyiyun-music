@@ -105,6 +105,13 @@
             <artifactId>hutool-extra</artifactId>
             <version>5.8.32</version>
         </dependency>
+
+        <!-- Apache Commons Text - HTML实体解码 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.10.0</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

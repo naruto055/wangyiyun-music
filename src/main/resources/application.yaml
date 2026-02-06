@@ -249,3 +249,20 @@ spring:
 video:
   parser:
     yt-dlp-executable: ${user.dir}/tools/yt-dlp  # 相对路径，与应用在同一目录
+
+---
+# B站视频搜索配置
+bilibili:
+  search:
+    # B站搜索API地址
+    api-url: https://api.bilibili.com/x/web-interface/search/type
+    # Cookie获取API地址
+    cookie-url: https://api.bilibili.com/x/frontend/finger/spi
+    # 默认分页大小
+    default-page-size: 20
+    # 最大分页大小
+    max-page-size: 50
+    # 请求超时时间（秒）
+    timeout: 10
+    # User-Agent
+    user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36 Edg/89.0.774.63
