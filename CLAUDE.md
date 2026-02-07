@@ -2,13 +2,34 @@
 
 > 基于 Spring Boot 的网易云音乐后端服务系统
 
-**文档生成时间**: 2026-02-01 20:19:20
+**文档生成时间**: 2026-02-07 00:00:21
 **项目版本**: 0.0.1-SNAPSHOT
 **技术栈**: Spring Boot 3.1.0 + Java 17 + Maven + MySQL + MyBatis-Plus
 
 ---
 
 ## 变更记录 (Changelog)
+
+### 2026-02-07 00:00
+- **增量更新项目 AI 上下文文档**
+- **新增 B站视频搜索功能（重大更新）**
+  - BilibiliSearchController: B站视频搜索、搜索历史查询与清空
+  - BilibiliSearchService: 搜索逻辑实现（RestTemplate + B站API）
+  - SearchHistoryService: 搜索历史管理（自动记录、次数统计）
+  - BilibiliSearchDTO、BilibiliVideoVO、BilibiliCookieVO、SearchHistoryVO
+  - SearchHistory 实体与 SearchHistoryMapper
+  - RestTemplateConfig 配置类（HTTP 客户端）
+- **Bug 修复记录（关键）**
+  - 修复 URL 二次编码导致搜索结果错误的问题
+  - 修复 Gzip 压缩响应解析失败的问题
+  - 修复 Cookie 获取 User-Agent 不正确的问题
+- **新增文档**
+  - `docs/bilibili-search-api.md`: B站搜索功能 API 对接文档（完整版）
+  - `docs/bilibili-search-bugfix.md`: Bug 修复记录与技术分析
+- **配置更新**
+  - `application.yaml`: 新增 B站搜索 API 配置（api-url、cookie-url、timeout 等）
+  - `pom.xml`: 新增 Apache Commons Text 依赖（HTML 实体解码）
+- **统计分析**: 12 个控制器，10 个 Mapper，13 个 VO，10 个 DTO，10 个实体
 
 ### 2026-02-01 20:19
 - **增量更新项目 AI 上下文文档**
@@ -47,7 +68,7 @@
 ## 项目概览
 
 ### 项目愿景
-构建一个功能完善的网易云音乐后端服务系统，提供音乐播放、歌手管理、专辑管理、收藏互动、视频转音频等核心功能，采用现代化的分层架构设计。
+构建一个功能完善的网易云音乐后端服务系统，提供音乐播放、歌手管理、专辑管理、收藏互动、视频转音频、B站视频搜索等核心功能，采用现代化的分层架构设计。
 
 ### 核心功能
 - ✅ **音乐管理服务**: 歌曲查询、播放URL获取、音乐列表、音乐详情
@@ -58,6 +79,7 @@
 - ✅ **分类标签服务**: 音乐分类、标签管理
 - ✅ **音频资源服务**: 音频文件URL映射、支持HTTP Range请求
 - ✅ **视频解析服务**: B站/YouTube视频解析并提取音频（基于 yt-dlp）
+- ✅ **B站视频搜索**: 关键词搜索B站视频、搜索历史管理（新增）
 - ✅ **音频安全服务**: 多维度限流 + 防盗链（Referer/User-Agent/IP黑名单）
 - ✅ **临时文件管理**: 定时清理过期临时音频文件
 
@@ -71,6 +93,8 @@
 - **API文档**: SpringDoc OpenAPI 2.3.0 - 自动生成 Swagger 文档
 - **限流工具**: Guava RateLimiter 32.1.3 - Google 限流组件
 - **工具库**: Hutool 5.8.32 - Java 工具类库（IP 获取、文件处理）
+- **HTTP客户端**: RestTemplate - Spring 内置 HTTP 客户端（调用 B站API）
+- **HTML解码**: Apache Commons Text 1.10.0 - HTML 实体解码
 - **开发环境**: IntelliJ IDEA (推荐)
 
 ### 项目状态
@@ -79,6 +103,7 @@
 - ✅ **已完成**: 音频资源URL映射功能
 - ✅ **已完成**: 视频解析服务（B站支持）、音频限流防盗链、临时文件定时清理
 - ✅ **已完成**: 歌手表完整CRUD、专辑表完整CRUD（含业务校验）
+- ✅ **已完成**: B站视频搜索功能（搜索、历史记录）
 - 🚧 **进行中**: 功能优化与测试完善
 - 📅 **待开发**: 用户认证授权、缓存集成、性能优化、YouTube 支持完善
 
@@ -92,28 +117,28 @@
 graph TD
     Root["(根) wangyiyun-music<br/>网易云音乐后端"]
 
-    Root --> Controller["controller<br/>控制器层（11个）"]
-    Root --> Service["service<br/>服务层（30个）"]
-    Root --> Mapper["mapper<br/>数据访问层（9个）"]
-    Root --> Model["model<br/>数据模型（30个）"]
-    Root --> Config["config<br/>配置类（7个）"]
+    Root --> Controller["controller<br/>控制器层（12个）"]
+    Root --> Service["service<br/>服务层（32个）"]
+    Root --> Mapper["mapper<br/>数据访问层（10个）"]
+    Root --> Model["model<br/>数据模型（33个）"]
+    Root --> Config["config<br/>配置类（8个）"]
     Root --> Filter["filter<br/>过滤器（2个）"]
     Root --> Exception["exception<br/>异常处理（6个）"]
     Root --> Common["common<br/>公共类（1个）"]
-    Root --> Resources["resources<br/>配置文件（11个）"]
+    Root --> Resources["resources<br/>配置文件（12个）"]
 
     Service --> ServiceImpl["impl<br/>服务实现"]
     Service --> Strategy["strategy<br/>策略模式"]
 
-    Model --> Entity["entity<br/>实体类（9个）"]
-    Model --> DTO["dto<br/>传输对象（9个）"]
-    Model --> VO["vo<br/>视图对象（9个）"]
+    Model --> Entity["entity<br/>实体类（10个）"]
+    Model --> DTO["dto<br/>传输对象（10个）"]
+    Model --> VO["vo<br/>视图对象（13个）"]
     Model --> Enums["enums<br/>枚举（1个）"]
     Model --> Internal["internal<br/>内部实体（2个）"]
 
     Config --> Properties["properties<br/>配置属性"]
 
-    Resources --> MapperXML["mapper<br/>MyBatis XML（9个）"]
+    Resources --> MapperXML["mapper<br/>MyBatis XML（10个）"]
 
     click Controller "#1-controller-层-web-控制层" "查看 Controller 层文档"
     click Service "#2-service-层-业务逻辑层" "查看 Service 层文档"
@@ -144,7 +169,7 @@ graph TB
     end
 
     subgraph "表现层 Presentation Layer"
-        APIController[RESTful API 控制器<br/>11个控制器]
+        APIController[RESTful API 控制器<br/>12个控制器]
         GlobalAdvice[全局响应封装<br/>统一返回格式]
     end
 
@@ -160,6 +185,8 @@ graph TB
         FavoriteService[收藏服务]
         AudioService[音频服务]
         VideoParseService[视频解析服务]
+        BilibiliSearchService[B站搜索服务<br/>NEW]
+        SearchHistoryService[搜索历史服务<br/>NEW]
         ArtistNameService[歌手名称填充公共服务]
     end
 
@@ -174,12 +201,17 @@ graph TB
         Entity[实体类 Entity<br/>数据库表映射]
     end
 
+    subgraph "外部服务 External Services"
+        BilibiliAPI[B站API<br/>搜索/Cookie<br/>NEW]
+    end
+
     subgraph "基础设施层 Infrastructure Layer"
         MySQL[(MySQL 数据库<br/>wangyiyun_music)]
         ExceptionHandler[全局异常处理器]
         Swagger[Swagger API 文档]
         YtDlp[yt-dlp 外部工具]
         TempCleanup[临时文件定时清理]
+        RestTemplate[RestTemplate<br/>HTTP客户端<br/>NEW]
     end
 
     Client -->|HTTP请求| APIController
@@ -192,6 +224,11 @@ graph TB
     GlobalAdvice -->|业务处理| FavoriteService
     GlobalAdvice -->|业务处理| AudioService
     GlobalAdvice -->|业务处理| VideoParseService
+    GlobalAdvice -->|业务处理| BilibiliSearchService
+    GlobalAdvice -->|业务处理| SearchHistoryService
+    BilibiliSearchService -->|HTTP请求| RestTemplate
+    RestTemplate -->|调用API| BilibiliAPI
+    SearchHistoryService -->|记录历史| Mapper
     VideoParseService -->|选择策略| VideoPlatformStrategy
     VideoPlatformStrategy -->|B站| BilibiliStrategy
     VideoPlatformStrategy -->|YouTube| YoutubeStrategy
@@ -221,16 +258,20 @@ graph TB
     style FavoriteService fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
     style AudioService fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
     style VideoParseService fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style BilibiliSearchService fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style SearchHistoryService fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
     style VideoPlatformStrategy fill:#fff9c4,stroke:#f9a825,stroke-width:2px
     style BilibiliStrategy fill:#fff9c4,stroke:#f9a825,stroke-width:2px
     style YoutubeStrategy fill:#fff9c4,stroke:#f9a825,stroke-width:2px
     style Mapper fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
     style Entity fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style BilibiliAPI fill:#ffccbc,stroke:#d84315,stroke-width:3px
     style MySQL fill:#ffebee,stroke:#d32f2f,stroke-width:2px
     style ExceptionHandler fill:#fce4ec,stroke:#c2185b,stroke-width:2px
     style Swagger fill:#e0f2f1,stroke:#00796b,stroke-width:2px
     style YtDlp fill:#f5f5f5,stroke:#616161,stroke-width:2px
     style TempCleanup fill:#f5f5f5,stroke:#616161,stroke-width:2px
+    style RestTemplate fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
     style ArtistNameService fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
@@ -242,8 +283,10 @@ graph TB
 | **表现层** | SpringDoc OpenAPI | 2.3.0 | 自动生成 Swagger 文档 |
 | **中间件** | Servlet Filter | Jakarta EE 9 | 防盗链、限流过滤器 |
 | **业务层** | Spring Service | 3.1.0 | 业务逻辑处理和事务管理 |
+| **业务层** | RestTemplate | Spring Boot 3.1.0 | HTTP 客户端（调用B站API） |
 | **业务层** | Guava RateLimiter | 32.1.3 | 限流工具 |
 | **业务层** | Hutool | 5.8.32 | Java 工具类库 |
+| **业务层** | Apache Commons Text | 1.10.0 | HTML 实体解码 |
 | **策略层** | Strategy Pattern | - | 视频平台解析策略模式 |
 | **持久层** | MyBatis-Plus | 3.5.5 | ORM 框架，增强 MyBatis |
 | **持久层** | Druid | 1.2.21 | 阿里巴巴数据库连接池 |
@@ -252,6 +295,7 @@ graph TB
 | **工具** | FastJson2 | 2.0.43 | JSON 处理 |
 | **工具** | Validation | - | 参数校验 |
 | **外部** | yt-dlp | latest | 视频下载和音频提取工具 |
+| **外部** | B站API | - | B站搜索API、Cookie API |
 | **测试** | JUnit 5 + Mockito | - | 单元测试和集成测试 |
 
 ### 数据流设计
@@ -263,6 +307,7 @@ graph TB
            → GlobalResponseAdvice (统一响应封装)
            → Service (业务逻辑处理)
            → Strategy (平台策略选择，如需)
+           → RestTemplate (调用外部API，如B站)
            → Mapper (MyBatis-Plus 数据访问)
            → MySQL (数据库持久化)
            → 响应返回 (统一Result格式)
@@ -278,7 +323,7 @@ graph TB
 
 **路径**: `src/main/java/com/naruto/wangyiyunmusic/controller/`
 **职责**: 接收 HTTP 请求，调用 Service 层处理业务，返回响应数据
-**文件数量**: 11个
+**文件数量**: 12个
 
 | 控制器 | API 路径 | 说明 |
 |-------|---------|------|
@@ -289,6 +334,7 @@ graph TB
 | **PlayRecordController** | `/api/playrecord/*` | 播放记录管理 |
 | **AudioController** | `/api/audio/*` | 音频资源访问（支持 Range 请求） |
 | **VideoParseController** | `/api/video/*` | 视频解析（B站/YouTube 转音频） |
+| **BilibiliSearchController** | `/api/bilibili/*` | B站视频搜索（搜索、历史记录）**[NEW]** |
 | **CategoryController** | `/api/category/*` | 分类管理 |
 | **TagController** | `/api/tag/*` | 标签管理 |
 | **MusicArtistController** | `/api/music-artist/*` | 音乐-歌手关联 |
@@ -300,19 +346,24 @@ graph TB
 - `GET /api/music/list` - 获取音乐列表（分页）
 - `GET /api/music/{id}` - 获取音乐详情
 
-**歌手管理（新增完整CRUD）**:
+**歌手管理**:
 - `GET /api/artist/list` - 分页查询歌手列表（支持名称、国家搜索，支持排序）
 - `GET /api/artist/{id}` - 获取歌手详情
 - `POST /api/artist` - 创建歌手（含名称重复校验）
 - `PUT /api/artist/{id}` - 更新歌手信息（含名称重复校验）
 - `DELETE /api/artist/{id}` - 删除歌手（逻辑删除）
 
-**专辑管理（新增完整CRUD）**:
+**专辑管理**:
 - `GET /api/album/list` - 分页查询专辑列表（支持关键词搜索，支持排序，含歌曲数量）
 - `GET /api/album/{id}` - 获取专辑详情（含歌曲数量）
 - `POST /api/album` - 创建专辑
 - `PUT /api/album/{id}` - 更新专辑信息
 - `DELETE /api/album/{id}` - 删除专辑（含关联歌曲检查，逻辑删除）
+
+**B站视频搜索（新增）**:
+- `POST /api/bilibili/search` - 搜索B站视频（分页）
+- `GET /api/bilibili/search/history` - 查询搜索历史
+- `DELETE /api/bilibili/search/history` - 清空搜索历史
 
 **其他服务**:
 - `GET /api/audio/{musicId}` - 获取音频访问URL（支持HTTP Range请求）
@@ -324,7 +375,7 @@ graph TB
 
 **路径**: `src/main/java/com/naruto/wangyiyunmusic/service/`
 **职责**: 实现核心业务逻辑、处理事务管理、调用 Mapper 层访问数据
-**文件数量**: 30个（接口 + 实现）
+**文件数量**: 32个（接口 + 实现）
 
 **核心服务**:
 
@@ -335,6 +386,8 @@ graph TB
 | **AlbumService** | 专辑业务服务 | 分页查询、CRUD操作、歌曲数量统计、删除关联检查 |
 | **AudioService** | 音频资源服务 | 音频URL拼接、Range 请求支持 |
 | **VideoParseService** | 视频解析服务 | 协调解析流程、策略选择、文件验证 |
+| **BilibiliSearchService** | B站搜索服务 | RestTemplate调用B站API、Cookie获取、搜索结果解析 **[NEW]** |
+| **SearchHistoryService** | 搜索历史服务 | 自动记录搜索、次数统计、历史查询与清空 **[NEW]** |
 | **YtDlpService** | yt-dlp 工具服务 | 调用外部工具、解析结果处理 |
 | **FileValidationService** | 文件验证服务 | 文件大小、格式、存储容量验证 |
 | **TempFileCleanupService** | 临时文件清理服务 | 定时清理过期临时音频文件 |
@@ -353,6 +406,7 @@ graph TB
 **路径**: `src/main/java/com/naruto/wangyiyunmusic/mapper/`
 **职责**: 封装数据库 CRUD 操作，使用 MyBatis-Plus 增强
 **技术**: MyBatis-Plus 3.5.5
+**文件数量**: 10个
 
 **主要 Mapper**:
 - `MusicMapper.java` - 音乐数据访问
@@ -360,6 +414,7 @@ graph TB
 - `AlbumMapper.java` - 专辑数据访问
 - `FavoriteMapper.java` - 收藏数据访问
 - `PlayRecordMapper.java` - 播放记录数据访问
+- `SearchHistoryMapper.java` - 搜索历史数据访问 **[NEW]**
 - 其他：CategoryMapper, TagMapper, MusicArtistMapper, MusicTagMapper
 
 **XML 映射文件**: `src/main/resources/mapper/*.xml`
@@ -370,41 +425,46 @@ graph TB
 
 **路径**: `src/main/java/com/naruto/wangyiyunmusic/model/`
 **职责**: 定义数据库实体类、数据传输对象、视图对象
-**文件数量**: 30个
+**文件数量**: 33个
 
-#### 4.1 Entity (实体类) - 9个
+#### 4.1 Entity (实体类) - 10个
 - `Music.java` - 音乐实体
 - `Artist.java` - 歌手实体
 - `Album.java` - 专辑实体
 - `Favorite.java` - 收藏实体
 - `PlayRecord.java` - 播放记录实体
+- `SearchHistory.java` - 搜索历史实体 **[NEW]**
 - `Tag.java` - 标签实体
 - `Category.java` - 分类实体
 - `MusicArtist.java` - 音乐-歌手关联实体
 - `MusicTag.java` - 音乐-标签关联实体
 
-#### 4.2 VO (视图对象) - 9个
+#### 4.2 VO (视图对象) - 13个
 - `MusicListVO.java` - 音乐列表视图对象
 - `MusicDetailVO.java` - 音乐详情视图对象
 - `ArtistVO.java` - 歌手视图对象
-- **`ArtistListVO.java`** - 歌手列表视图对象（新增）
-- **`ArtistDetailVO.java`** - 歌手详情视图对象（新增）
-- **`AlbumListVO.java`** - 专辑列表视图对象（新增，含歌曲数量）
-- **`AlbumDetailVO.java`** - 专辑详情视图对象（新增，含歌曲数量）
+- `ArtistListVO.java` - 歌手列表视图对象
+- `ArtistDetailVO.java` - 歌手详情视图对象
+- `AlbumListVO.java` - 专辑列表视图对象（含歌曲数量）
+- `AlbumDetailVO.java` - 专辑详情视图对象（含歌曲数量）
 - `FavoriteVO.java` - 收藏视图对象
 - `AudioUrlVO.java` - 音频URL视图对象
 - `VideoParseResultVO.java` - 视频解析结果视图对象
+- `BilibiliVideoVO.java` - B站视频搜索结果视图对象（简化版） **[NEW]**
+- `BilibiliCookieVO.java` - B站Cookie视图对象 **[NEW]**
+- `SearchHistoryVO.java` - 搜索历史视图对象 **[NEW]**
 
-#### 4.3 DTO (数据传输对象) - 9个
+#### 4.3 DTO (数据传输对象) - 10个
 - `MusicQueryDTO.java` - 音乐查询参数对象
 - `PlayRecordDTO.java` - 播放记录传输对象
 - `VideoParseRequestDTO.java` - 视频解析请求参数对象
-- **`ArtistQueryDTO.java`** - 歌手查询参数对象（新增）
-- **`ArtistCreateDTO.java`** - 歌手创建参数对象（新增）
-- **`ArtistUpdateDTO.java`** - 歌手更新参数对象（新增）
-- **`AlbumQueryDTO.java`** - 专辑查询参数对象（新增）
-- **`AlbumCreateDTO.java`** - 专辑创建参数对象（新增）
-- **`AlbumUpdateDTO.java`** - 专辑更新参数对象（新增）
+- `ArtistQueryDTO.java` - 歌手查询参数对象
+- `ArtistCreateDTO.java` - 歌手创建参数对象
+- `ArtistUpdateDTO.java` - 歌手更新参数对象
+- `AlbumQueryDTO.java` - 专辑查询参数对象
+- `AlbumCreateDTO.java` - 专辑创建参数对象
+- `AlbumUpdateDTO.java` - 专辑更新参数对象
+- `BilibiliSearchDTO.java` - B站搜索请求参数对象 **[NEW]**
 
 #### 4.4 Enums (枚举) - 1个
 - `VideoPlatform.java` - 视频平台枚举（BILIBILI, YOUTUBE）
@@ -418,8 +478,8 @@ graph TB
 ### 5. Config 层 (配置类)
 
 **路径**: `src/main/java/com/naruto/wangyiyunmusic/config/`
-**职责**: Spring 配置类、静态资源配置、Swagger配置
-**文件数量**: 7个
+**职责**: Spring 配置类、静态资源配置、Swagger配置、HTTP客户端配置
+**文件数量**: 8个
 
 | 配置类 | 说明 |
 |-------|------|
@@ -429,6 +489,7 @@ graph TB
 | **VideoParseConfig** | 视频解析配置（yt-dlp 路径、临时文件、存储容量） |
 | **ScheduleConfig** | 定时任务配置（临时文件清理） |
 | **GlobalResponseAdvice** | 全局响应封装（统一 Result 格式） |
+| **RestTemplateConfig** | RestTemplate 配置（HTTP 客户端超时设置） **[NEW]** |
 
 **子目录**:
 - `properties/` - 配置属性类
@@ -499,13 +560,13 @@ graph TB
 ### 11. 配置文件
 
 **路径**: `src/main/resources/`
-**文件数量**: 11个
+**文件数量**: 12个
 
 | 文件 | 说明 |
 |------|------|
-| **application.yaml** | 主配置文件（数据库、MyBatis、Swagger、音频、视频解析、安全配置） |
+| **application.yaml** | 主配置文件（数据库、MyBatis、Swagger、音频、视频解析、安全配置、B站API配置） |
 | **logback-spring.xml** | 日志配置（Logback） |
-| **mapper/*.xml** | MyBatis XML 映射文件（9个） |
+| **mapper/*.xml** | MyBatis XML 映射文件（10个） |
 
 **主要配置项**:
 - 服务器端口: `8910`
@@ -514,6 +575,7 @@ graph TB
 - SpringDoc OpenAPI: API文档配置
 - 音频文件配置: 存储路径、访问URL前缀、安全配置（限流、防盗链）
 - 视频解析配置: yt-dlp 路径、临时文件路径、存储容量限制、定时清理
+- **B站搜索配置（新增）**: API地址、Cookie地址、超时时间、分页大小、User-Agent
 
 ---
 
@@ -603,11 +665,13 @@ public AudioUrlVO getAudioUrl(Long musicId) {
 | 查询单个 | GET | `/api/music/{id}` | 获取音乐详情 |
 | 创建 | POST | `/api/favorite` | 添加收藏 |
 | 创建 | POST | `/api/video/parse` | 解析视频并提取音频 |
+| 创建 | POST | `/api/bilibili/search` | 搜索B站视频 |
 | 创建 | POST | `/api/artist` | 创建歌手 |
 | 更新 | PUT | `/api/music/{id}` | 更新音乐信息 |
 | 更新 | PUT | `/api/artist/{id}` | 更新歌手信息 |
 | 删除 | DELETE | `/api/favorite/{id}` | 取消收藏 |
 | 删除 | DELETE | `/api/album/{id}` | 删除专辑（逻辑删除） |
+| 删除 | DELETE | `/api/bilibili/search/history` | 清空搜索历史 |
 
 **响应格式**（统一 Result 封装）:
 ```json
@@ -718,12 +782,16 @@ mvn clean test jacoco:report
 
 ### 推荐测试重点
 1. **Controller 层**: API 接口测试（MockMvc）
+   - 重点：BilibiliSearchController（搜索、历史记录）
 2. **Service 层**: 业务逻辑单元测试（Mockito）
    - 重点：ArtistService（名称重复校验）
    - 重点：AlbumService（歌曲数量统计、删除关联检查）
+   - 重点：BilibiliSearchService（URL编码、Cookie获取、搜索结果解析）
+   - 重点：SearchHistoryService（历史记录管理、次数统计）
 3. **Filter 层**: 过滤器功能测试（限流、防盗链）
 4. **Strategy 层**: 策略模式测试（视频平台解析）
 5. **异常处理**: 异常捕获和响应测试
+6. **集成测试**: RestTemplate 调用 B站API 测试（使用 MockRestServiceServer）
 
 ---
 
@@ -738,6 +806,7 @@ mvn clean test jacoco:report
 - **统一异常处理**: 使用 `@ControllerAdvice` 统一捕获异常
 - **日志规范**: 使用 SLF4J + Logback 记录日志
 - **业务校验**: 创建前校验重复、删除前检查关联（如 AlbumService）
+- **HTTP 客户端**: RestTemplate 调用外部 API 时使用 URI 对象避免二次编码
 
 ### 日志规范
 使用 SLF4J + Logback 记录日志：
@@ -759,6 +828,35 @@ public class AudioServiceImpl implements AudioService {
 }
 ```
 
+### HTTP 客户端最佳实践（重要）
+
+**避免 URL 二次编码**：
+```java
+// ❌ 错误：使用 String 会导致二次编码
+String requestUrl = UriComponentsBuilder.fromHttpUrl(apiUrl)
+    .queryParam("keyword", "稻香")
+    .build()
+    .encode()
+    .toUriString();  // 返回 String
+
+restTemplate.exchange(requestUrl, HttpMethod.GET, entity, Map.class);
+// 实际发送: keyword=%25E7%25A8%25BB...（百分号被编码为 %25）
+
+// ✅ 正确：使用 URI 对象避免二次编码
+java.net.URI requestUri = UriComponentsBuilder.fromHttpUrl(apiUrl)
+    .queryParam("keyword", "稻香")
+    .build()
+    .encode()
+    .toUri();  // 返回 URI 对象（关键）
+
+restTemplate.exchange(requestUri, HttpMethod.GET, entity, Map.class);
+// 实际发送: keyword=%E7%A8%BB%E9%A6%99（正确）
+```
+
+**处理 Gzip 压缩响应**：
+- 使用 `SimpleClientHttpRequestFactory` 时，不要设置 `Accept-Encoding: gzip`
+- 如需支持 Gzip，使用 `HttpComponentsClientHttpRequestFactory`
+
 ---
 
 ## AI 使用指引
@@ -769,6 +867,7 @@ public class AudioServiceImpl implements AudioService {
 - 测试用例生成
 - API 文档完善
 - 性能优化建议
+- Bug 诊断与修复（如 URL 编码问题）
 
 ### 推荐提示词
 ```
@@ -785,6 +884,10 @@ public class AudioServiceImpl implements AudioService {
 分析 [模块名] 的性能瓶颈，并提供优化建议（如缓存、批量查询、异步处理）。
 ```
 
+```
+诊断 RestTemplate 调用外部 API 时的 URL 编码问题，并提供修复方案。
+```
+
 ### 开发工作流
 1. **创建分支**: `git checkout -b feature/your-feature`
 2. **编写代码**: 遵循开发规范和分层架构
@@ -799,20 +902,21 @@ public class AudioServiceImpl implements AudioService {
 ## 项目元数据
 
 ### 统计信息
-- **Java 文件总数**: 100个
-- **控制器数量**: 11个
-- **服务类数量**: 30个（接口 15 + 实现 15）
-- **实体类数量**: 9个
-- **DTO数量**: 9个
-- **VO数量**: 9个
+- **Java 文件总数**: 110个（估算）
+- **控制器数量**: 12个
+- **服务类数量**: 32个（接口 16 + 实现 16）
+- **实体类数量**: 10个
+- **Mapper数量**: 10个
+- **DTO数量**: 10个
+- **VO数量**: 13个
 - **过滤器数量**: 2个
 - **异常类数量**: 6个
-- **配置类数量**: 7个
+- **配置类数量**: 8个
 
 ### 覆盖率报告
 - **扫描策略**: 自适应混合（轻量清点 + 模块优先扫描）
-- **总文件估算**: ~105个
-- **已扫描文件**: 100个
+- **总文件估算**: ~115个
+- **已扫描文件**: 110个
 - **覆盖率**: ~95%
 - **忽略模式**: `target/**, .idea/**, *.iml, *.log, music-data/**, tools/**, .claude/**, _bmad/**, .zcf/**`
 
@@ -821,14 +925,17 @@ public class AudioServiceImpl implements AudioService {
 - **推荐下一步**:
   1. 补充单元测试（建议覆盖率 > 80%）
   2. 为歌手、专辑CRUD功能添加集成测试
-  3. 为新增的视频解析模块添加集成测试
-  4. 为音频安全过滤器添加测试用例
-  5. 补充 API 使用示例和最佳实践文档
+  3. 为新增的B站搜索模块添加单元测试和集成测试（重点：URL编码、Cookie获取、搜索结果解析）
+  4. 为SearchHistoryService添加单元测试（历史记录管理、次数统计）
+  5. 为视频解析模块添加集成测试
+  6. 为音频安全过滤器添加测试用例
+  7. 补充 API 使用示例和最佳实践文档
 
 ---
 
 ## 相关链接
 
+### 官方文档
 - [Spring Boot 官方文档](https://spring.io/projects/spring-boot)
 - [MyBatis-Plus 官方文档](https://baomidou.com/)
 - [SpringDoc OpenAPI 文档](https://springdoc.org/)
@@ -839,6 +946,13 @@ public class AudioServiceImpl implements AudioService {
 - [yt-dlp 官方文档](https://github.com/yt-dlp/yt-dlp)
 - [Guava 官方文档](https://github.com/google/guava)
 - [Hutool 官方文档](https://hutool.cn/)
+
+### 项目文档
+- [B站搜索功能 API 对接文档](./docs/bilibili-search-api.md)
+- [B站搜索功能 Bug 修复记录](./docs/bilibili-search-bugfix.md)
+
+### 外部 API
+- [B站搜索API文档](https://github.com/SocialSisterYi/bilibili-API-collect)
 
 ---
 

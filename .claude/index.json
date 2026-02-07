@@ -5,11 +5,11 @@
     "version": "0.0.1-SNAPSHOT",
     "language": "Java",
     "framework": "Spring Boot 3.1.0",
-    "last_scan_time": "2026-02-01T20:19:20+08:00",
+    "last_scan_time": "2026-02-07T00:00:21+08:00",
     "scan_strategy": "adaptive-mixed",
     "coverage": {
-      "total_files_estimated": 105,
-      "scanned_files": 100,
+      "total_files_estimated": 115,
+      "scanned_files": 110,
       "coverage_percentage": 95,
       "ignored_patterns": [
         "target/**",
@@ -30,7 +30,7 @@
       "path": "src/main/java/com/naruto/wangyiyunmusic/controller",
       "type": "presentation",
       "description": "RESTful API 控制器层",
-      "file_count": 11,
+      "file_count": 12,
       "key_files": [
         "MusicController.java",
         "ArtistController.java",
@@ -38,6 +38,7 @@
         "FavoriteController.java",
         "AudioController.java",
         "VideoParseController.java",
+        "BilibiliSearchController.java - B站视频搜索控制器（新增）",
         "PlayRecordController.java",
         "CategoryController.java",
         "TagController.java",
@@ -57,6 +58,9 @@
         "POST /api/album - 创建专辑",
         "PUT /api/album/{id} - 更新专辑信息",
         "DELETE /api/album/{id} - 删除专辑（含关联歌曲检查，逻辑删除）",
+        "POST /api/bilibili/search - 搜索B站视频（分页）- 新增",
+        "GET /api/bilibili/search/history - 查询搜索历史 - 新增",
+        "DELETE /api/bilibili/search/history - 清空搜索历史 - 新增",
         "GET /api/audio/{musicId} - 获取音频访问URL",
         "POST /api/video/parse - 解析视频并提取音频"
       ],
@@ -71,13 +75,15 @@
       "path": "src/main/java/com/naruto/wangyiyunmusic/service",
       "type": "business",
       "description": "业务逻辑服务层",
-      "file_count": 30,
+      "file_count": 32,
       "key_files": [
         "MusicService.java",
         "ArtistService.java",
         "AlbumService.java",
         "AudioService.java",
         "VideoParseService.java",
+        "BilibiliSearchService.java - B站搜索服务（新增）",
+        "SearchHistoryService.java - 搜索历史服务（新增）",
         "YtDlpService.java",
         "FileValidationService.java",
         "TempFileCleanupService.java",
@@ -100,13 +106,14 @@
       "path": "src/main/java/com/naruto/wangyiyunmusic/mapper",
       "type": "persistence",
       "description": "MyBatis-Plus 数据访问层",
-      "file_count": 9,
+      "file_count": 10,
       "key_files": [
         "MusicMapper.java",
         "ArtistMapper.java",
         "AlbumMapper.java",
         "FavoriteMapper.java",
         "PlayRecordMapper.java",
+        "SearchHistoryMapper.java - 搜索历史数据访问（新增）",
         "CategoryMapper.java",
         "TagMapper.java",
         "MusicArtistMapper.java",
@@ -118,6 +125,7 @@
         "src/main/resources/mapper/AlbumMapper.xml",
         "src/main/resources/mapper/FavoriteMapper.xml",
         "src/main/resources/mapper/PlayRecordMapper.xml",
+        "src/main/resources/mapper/SearchHistoryMapper.xml - 新增",
         "src/main/resources/mapper/CategoryMapper.xml",
         "src/main/resources/mapper/TagMapper.xml",
         "src/main/resources/mapper/MusicArtistMapper.xml",
@@ -134,11 +142,11 @@
       "path": "src/main/java/com/naruto/wangyiyunmusic/model",
       "type": "data",
       "description": "数据模型（实体、DTO、VO）",
-      "file_count": 30,
+      "file_count": 33,
       "subdirectories": [
-        "entity - 数据库实体类（9个）",
-        "dto - 数据传输对象（9个）",
-        "vo - 视图对象（9个）",
+        "entity - 数据库实体类（10个）",
+        "dto - 数据传输对象（10个）",
+        "vo - 视图对象（13个）",
         "enums - 枚举类型（1个）",
         "internal - 内部实体（2个）"
       ],
@@ -149,6 +157,7 @@
           "Album.java",
           "Favorite.java",
           "PlayRecord.java",
+          "SearchHistory.java - 搜索历史实体（新增）",
           "Tag.java",
           "Category.java",
           "MusicArtist.java",
@@ -158,6 +167,7 @@
           "MusicQueryDTO.java",
           "PlayRecordDTO.java",
           "VideoParseRequestDTO.java",
+          "BilibiliSearchDTO.java - B站搜索请求参数（新增）",
           "ArtistQueryDTO.java",
           "ArtistCreateDTO.java",
           "ArtistUpdateDTO.java",
@@ -175,7 +185,10 @@
           "AlbumDetailVO.java",
           "FavoriteVO.java",
           "AudioUrlVO.java",
-          "VideoParseResultVO.java"
+          "VideoParseResultVO.java",
+          "BilibiliVideoVO.java - B站视频搜索结果（新增，简化版）",
+          "BilibiliCookieVO.java - B站Cookie信息（新增）",
+          "SearchHistoryVO.java - 搜索历史视图（新增）"
         ],
         "enums": [
           "VideoPlatform.java"
@@ -196,14 +209,15 @@
       "path": "src/main/java/com/naruto/wangyiyunmusic/config",
       "type": "configuration",
       "description": "Spring 配置类",
-      "file_count": 7,
+      "file_count": 8,
       "key_files": [
         "MybatisPlusConfig.java",
         "OpenApiConfig.java",
         "WebMvcConfig.java",
         "VideoParseConfig.java",
         "ScheduleConfig.java",
-        "GlobalResponseAdvice.java"
+        "GlobalResponseAdvice.java",
+        "RestTemplateConfig.java - HTTP客户端配置（新增）"
       ],
       "subdirectories": [
         "properties - 配置属性类"
@@ -286,11 +300,27 @@
       "path": "src/main/resources",
       "type": "configuration",
       "description": "应用配置文件",
-      "file_count": 11,
+      "file_count": 12,
       "key_files": [
-        "application.yaml - 主配置文件",
+        "application.yaml - 主配置文件（新增B站搜索API配置）",
         "logback-spring.xml - 日志配置",
-        "mapper/*.xml - MyBatis XML 映射文件（9个）"
+        "mapper/*.xml - MyBatis XML 映射文件（10个）"
+      ],
+      "coverage": {
+        "has_interfaces": false,
+        "has_tests": false,
+        "has_documentation": true
+      }
+    },
+    {
+      "name": "docs",
+      "path": "docs/",
+      "type": "documentation",
+      "description": "项目文档",
+      "file_count": 2,
+      "key_files": [
+        "bilibili-search-api.md - B站搜索功能API对接文档（新增）",
+        "bilibili-search-bugfix.md - B站搜索功能Bug修复记录（新增）"
       ],
       "coverage": {
         "has_interfaces": false,
@@ -313,14 +343,46 @@
     "orm": "MyBatis-Plus 3.5.5",
     "connection_pool": "Druid 1.2.21",
     "api_doc": "SpringDoc OpenAPI 2.3.0",
+    "http_client": "RestTemplate（Spring Boot 3.1.0）- 用于调用B站API",
     "utilities": [
       "Lombok",
       "FastJson2 2.0.43",
       "Guava 32.1.3",
-      "Hutool 5.8.32"
+      "Hutool 5.8.32",
+      "Apache Commons Text 1.10.0 - HTML实体解码"
+    ],
+    "external_tools": [
+      "yt-dlp - 视频下载和音频提取"
+    ],
+    "external_apis": [
+      "B站搜索API - https://api.bilibili.com/x/web-interface/search/type",
+      "B站Cookie API - https://api.bilibili.com/x/frontend/finger/spi"
     ]
   },
   "new_features": [
+    {
+      "name": "B站视频搜索功能",
+      "description": "支持通过关键词搜索B站视频、自动记录搜索历史、查询和清空历史记录",
+      "modules": [
+        "BilibiliSearchController - 搜索控制器",
+        "BilibiliSearchService - 搜索业务逻辑（RestTemplate调用B站API）",
+        "SearchHistoryService - 搜索历史管理（自动记录、次数统计）",
+        "SearchHistory - 搜索历史实体",
+        "SearchHistoryMapper - 搜索历史数据访问",
+        "BilibiliSearchDTO - 搜索请求参数",
+        "BilibiliVideoVO - 搜索结果视图对象（简化版）",
+        "BilibiliCookieVO - Cookie信息视图对象",
+        "SearchHistoryVO - 搜索历史视图对象",
+        "RestTemplateConfig - HTTP客户端配置"
+      ],
+      "bug_fixes": [
+        "修复 URL 二次编码导致搜索结果错误的问题（使用 URI 对象而不是 String）",
+        "修复 Gzip 压缩响应解析失败的问题（删除 Accept-Encoding 头）",
+        "修复 Cookie 获取 User-Agent 不正确的问题（使用 iPhone 移动端 User-Agent）"
+      ],
+      "status": "新增",
+      "date": "2026-02-07"
+    },
     {
       "name": "歌手管理完整CRUD",
       "description": "支持歌手的分页查询、详情查询、创建、更新、删除（逻辑删除），包含名称重复校验",
@@ -334,7 +396,7 @@
         "ArtistListVO",
         "ArtistDetailVO"
       ],
-      "status": "新增",
+      "status": "已实现",
       "date": "2026-02-01"
     },
     {
@@ -350,7 +412,7 @@
         "AlbumListVO (含歌曲数量)",
         "AlbumDetailVO (含歌曲数量)"
       ],
-      "status": "新增",
+      "status": "已实现",
       "date": "2026-02-01"
     },
     {
@@ -391,27 +453,37 @@
   "gaps": {
     "missing_tests": [
       "controller/**",
-      "service/**",
+      "service/**（特别是 BilibiliSearchService、SearchHistoryService）",
       "filter/**"
     ],
     "missing_documentation": [],
     "recommended_next_steps": [
       "补充单元测试（建议覆盖率 > 80%）",
       "为歌手、专辑CRUD功能添加集成测试",
-      "为新增的视频解析模块添加集成测试",
+      "为新增的B站搜索模块添加单元测试和集成测试（重点：URL编码、Cookie获取、搜索结果解析）",
+      "为SearchHistoryService添加单元测试（历史记录管理、次数统计）",
+      "为视频解析模块添加集成测试",
       "为音频安全过滤器添加测试用例",
       "补充 API 使用示例和最佳实践文档"
     ]
   },
   "statistics": {
-    "java_files_total": 100,
-    "controllers": 11,
-    "services": 30,
-    "entities": 9,
-    "dto_count": 9,
-    "vo_count": 9,
+    "java_files_total": 110,
+    "controllers": 12,
+    "services": 32,
+    "mappers": 10,
+    "entities": 10,
+    "dto_count": 10,
+    "vo_count": 13,
     "filters": 2,
     "exceptions": 6,
-    "configs": 7
-  }
+    "configs": 8
+  },
+  "important_notes": [
+    "使用 RestTemplate 调用外部 API 时，必须使用 URI 对象（toUri()）而不是 String（toUriString()），以避免 URL 二次编码问题",
+    "使用 SimpleClientHttpRequestFactory 时，不要设置 Accept-Encoding: gzip，否则会导致响应解析失败",
+    "B站Cookie API 需要使用 iPhone 移动端 User-Agent 才能获取有效 Cookie",
+    "歌手和专辑的删除操作为逻辑删除，不会真正删除数据库记录",
+    "B站搜索结果采用简化版设计，专注音乐本身，不展示 UP主信息和视频统计数据"
+  ]
 }
